@@ -19,3 +19,4 @@ E:\WorkSpace\GitHub\FileManager\FileManager\FileManager\obj\Debug\net6.0-windows
 E:\WorkSpace\GitHub\FileManager\FileManager\FileManager\obj\Debug\net6.0-windows\ref\FileManager.dll
 E:\WorkSpace\GitHub\FileManager\FileManager\FileManager\obj\Debug\net6.0-windows\FileManager.Main.resources
 E:\WorkSpace\GitHub\FileManager\FileManager\FileManager\obj\Debug\net6.0-windows\FileManager.Setting.resources
+E:\WorkSpace\GitHub\FileManager\FileManager\FileManager\obj\Debug\net6.0-windows\FileManager.Rename.resources

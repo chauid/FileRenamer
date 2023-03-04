@@ -1,3 +1,3 @@
-# FileManager
+# FileRenamer
 
 test project

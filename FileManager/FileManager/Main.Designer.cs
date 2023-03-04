@@ -171,7 +171,6 @@
             this.FileListView.UseCompatibleStateImageBehavior = false;
             this.FileListView.View = System.Windows.Forms.View.Details;
             this.FileListView.ColumnClick += new System.Windows.Forms.ColumnClickEventHandler(this.FileListView_ColumnClick);
-            this.FileListView.ItemChecked += new System.Windows.Forms.ItemCheckedEventHandler(this.FileListView_ItemChecked);
             this.FileListView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.FileListView_KeyDown);
             this.FileListView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.FileListView_MouseDown);
             // 
@@ -288,7 +287,7 @@
             this.ReNameButton.Name = "ReNameButton";
             this.ReNameButton.Size = new System.Drawing.Size(180, 40);
             this.ReNameButton.TabIndex = 10;
-            this.ReNameButton.Text = "이름 일괄 변경";
+            this.ReNameButton.Text = "선택한 파일 이름 일괄 변경";
             this.ReNameButton.UseVisualStyleBackColor = true;
             this.ReNameButton.Click += new System.EventHandler(this.ReNameButton_Click);
             // 
@@ -298,7 +297,7 @@
             this.DateChangeButton.Name = "DateChangeButton";
             this.DateChangeButton.Size = new System.Drawing.Size(180, 40);
             this.DateChangeButton.TabIndex = 11;
-            this.DateChangeButton.Text = "시간 일괄 변경";
+            this.DateChangeButton.Text = "선택한 파일 시간 일괄 변경";
             this.DateChangeButton.UseVisualStyleBackColor = true;
             // 
             // DatePicker

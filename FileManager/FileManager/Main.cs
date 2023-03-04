@@ -5,8 +5,7 @@ using System.Diagnostics;
 using FindImage;
 using MaterialSkin;
 
-// private void FileListView_ItemChecked(object sender, ItemCheckedEventArgs e) // FileListView 아이템 선택 , Line : 231 부터 작업 시작 
-// Checked 이벤트 제거 -> timer 추가 후 주기적으로 선택한 FileListView item 개수 표시 
+// 이름 바꾸기 정규식 적용 -> 윈도우 파일 이름 특수 문자 제한 Line : 403 
 
 namespace FileManager
 {
@@ -20,7 +19,7 @@ namespace FileManager
         /// <summary>
         /// 항목별 아이템 리스트{파일명, 유형, 만든 날짜, 수정한 날짜, 크기} 
         /// </summary>
-        private ListViewItem[]? FileItemInfo;
+        private List<ListViewItem> FileItemInfo = new();
 
         /// <summary>
         /// 현재 폴더 경로 
@@ -33,6 +32,11 @@ namespace FileManager
         private string[]? FileList;
 
         /// <summary>
+        /// 불러온 파일 이름 개수(int) 
+        /// </summary>
+        int FileListCount;
+
+        /// <summary>
         /// 새 폴더 이름 
         /// </summary>
         private string NewFileName = "직박구리";
@@ -41,6 +45,11 @@ namespace FileManager
         /// 이름 바꾸기 전 기존 이름  
         /// </summary>
         private bool RenameState;
+
+        /// <summary>
+        /// FileListView 선택 개수 Update 
+        /// </summary>
+        private System.Windows.Forms.Timer? CheckedBoxTimer;
 
         private BackgroundWorker Worker;
         private int ProgressCounter;
@@ -59,6 +68,10 @@ namespace FileManager
             Worker.DoWork += Worker_DoWork;
             Worker.ProgressChanged += Worker_ProgressChanged;
             Worker.RunWorkerCompleted += Worker_RunWorkerCompleted;
+            CheckedBoxTimer = new();
+            CheckedBoxTimer.Interval = 34; // 30FPS 
+            CheckedBoxTimer.Tick += CheckedBoxTimer_Tick;
+            CheckedBoxTimer.Enabled = true;
             FileListView.Select();
         }
         private void Main_Load(object sender, EventArgs e) // 초기 화면 설정 
@@ -93,6 +106,16 @@ namespace FileManager
             else IsEmptyWorkSpaceLabel.Hide();
         }
         private void Main_Resize(object sender, EventArgs e) { MainUILayout(1); } // 화면 크기 조절 
+
+        private void CheckedBoxTimer_Tick(object? sender, EventArgs e)
+        {
+            if (FileListView.CheckedItems.Count > 0)
+            {
+                StatusLabel2.Location = new Point(StatusLabel1.Location.X + StatusLabel1.Width, StatusLabel1.Location.Y);
+                StatusLabel2.Text = string.Format("{0}개 선택함", FileListView.CheckedItems.Count);
+            }
+            else StatusLabel2.Text = string.Empty;
+        }
 
         /// <summary>
         /// 메뉴화면 UI 그리기 
@@ -136,7 +159,7 @@ namespace FileManager
         {
             string FolderPath;
             string[] SearchFile;
-            int FileListCount = 0;
+            FileListCount = 0;
             if (e.Argument is not null) FolderPath = e.Argument.ToString()!;
             else FolderPath = @"C:\";
             DirectoryInfo SelectDirectory = new(FolderPath);
@@ -154,7 +177,7 @@ namespace FileManager
                 if (!files.Attributes.HasFlag(FileAttributes.Hidden)) FileList[FileListCount++] = SearchFile[i];
             }
             Console.WriteLine("Files : {0}", FileList.Length);
-            FileItemInfo = new ListViewItem[FileList.Length];
+            FileItemInfo.Clear();
             double ProgressPercentage;
             for (int i = 0; i < FileList.Length; i++)
             {
@@ -166,7 +189,8 @@ namespace FileManager
                     else if (FileSize == 0) FileSize = 0;
                     else FileSize = 1;
                     string[] ItemInfo = { "", FilesInfo.Name, FilesInfo.Extension, FilesInfo.CreationTime.ToString(), FilesInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
-                    FileItemInfo[i] = new ListViewItem(ItemInfo);
+                    ListViewItem item = new ListViewItem(ItemInfo);
+                    FileItemInfo.Add(item);
                     ProgressPercentage = ++ProgressCounter / (double)FileList.Length * 100;
                     Worker.ReportProgress((int)ProgressPercentage);
                 }
@@ -180,8 +204,8 @@ namespace FileManager
         }
         private void Worker_RunWorkerCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
-            if (FileList is not null) StatusLabel1.Text = string.Format("{0}개 항목", FileList.Length);
-            if (FileItemInfo != null) FileListView.Items.AddRange(FileItemInfo);
+            if (FileList != null) StatusLabel1.Text = string.Format("{0}개 항목", FileList.Length);
+            if (FileItemInfo != null) FileListView.Items.AddRange(FileItemInfo.ToArray());
             ProgressCounter = 0;
         }
         #endregion
@@ -228,18 +252,12 @@ namespace FileManager
                 }
             }
         }
-        private void FileListView_ItemChecked(object sender, ItemCheckedEventArgs e) // FileListView 아이템 선택 
-        {
-            if (FileListView.FocusedItem != null)
-            {
-                if (FileListView.CheckedItems.Count > 0) StatusLabel2.Text = string.Format("{0}개 선택함", FileListView.CheckedItems.Count);
-                else StatusLabel2.Text = string.Empty;
-            }
-        }
         private void FileListView_KeyDown(object sender, KeyEventArgs e) // FileListView 키보드 이벤트 
         {
             if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) this.Close();
             else if (ModifierKeys == Keys.Control && e.KeyCode == Keys.A) foreach (ListViewItem item in FileListView.Items) item.Selected = true;
+            else if (ModifierKeys == Keys.Control && e.KeyCode == Keys.N) New_File();
+            else if (ModifierKeys == Keys.Control && e.KeyCode == Keys.O) OpenFolder();
             else if (e.KeyCode == Keys.Enter && FileListView.SelectedItems.Count > 0) Process_Start();
             else if (e.KeyCode == Keys.Delete && FileListView.SelectedItems.Count > 0) Delete_File();
             else if (e.KeyCode == Keys.F2) Rename_File();
@@ -321,41 +339,46 @@ namespace FileManager
                         ErrorState = true;
                     }
                 }
-                if(ErrorState) MessageBox.Show(ErrorMessage, "파일 없음");
+                if (ErrorState) MessageBox.Show(ErrorMessage, "파일 없음");
             }
         }
         private void New_File_Event(object? sender, EventArgs e) { New_File(); } // 새 파일(&N)Strip 
         private void New_File() // 새 파일 
         {
-            string NewFileFull = FolderPath + "\\" + NewFileName;
-            int FileNumber = 1;
-            if (File.Exists(NewFileFull)) FileNumber++;
-            while (File.Exists(NewFileFull + FileNumber)) FileNumber++;
-            if (FileNumber == 1)
+            if (FolderPath != null)
             {
-                File.Create(NewFileFull).Close();
-                FileInfo NewFileInfo = new(NewFileFull);
-                long FileSize = NewFileInfo.Length;
-                if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
-                else if (FileSize == 0) FileSize = 0;
-                else FileSize = 1;
-                string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
-                ListViewItem NewItem = new(ItemInfo);
-                FileListView.Items.Add(NewItem);
-
-            }
-            else
-            {
-                NewFileFull += FileNumber.ToString();
-                File.Create(NewFileFull).Close();
-                FileInfo NewFileInfo = new(NewFileFull);
-                long FileSize = NewFileInfo.Length;
-                if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
-                else if (FileSize == 0) FileSize = 0;
-                else FileSize = 1;
-                string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
-                ListViewItem NewItem = new(ItemInfo);
-                FileListView.Items.Add(NewItem);
+                string NewFileFull = FolderPath + "\\" + NewFileName;
+                int FileNumber = 1;
+                if (File.Exists(NewFileFull)) FileNumber++;
+                while (File.Exists(NewFileFull + '(' + FileNumber + ')')) FileNumber++;
+                if (FileNumber == 1)
+                {
+                    File.Create(NewFileFull).Close();
+                    FileInfo NewFileInfo = new(NewFileFull);
+                    long FileSize = NewFileInfo.Length;
+                    if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
+                    else if (FileSize == 0) FileSize = 0;
+                    else FileSize = 1;
+                    string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
+                    ListViewItem NewItem = new(ItemInfo);
+                    FileListView.Items.Add(NewItem);
+                    FileItemInfo.Add(NewItem);
+                }
+                else
+                {
+                    NewFileFull += '(' + FileNumber + ')';
+                    File.Create(NewFileFull).Close();
+                    FileInfo NewFileInfo = new(NewFileFull);
+                    long FileSize = NewFileInfo.Length;
+                    if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
+                    else if (FileSize == 0) FileSize = 0;
+                    else FileSize = 1;
+                    string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
+                    ListViewItem NewItem = new(ItemInfo);
+                    FileListView.Items.Add(NewItem);
+                    FileItemInfo.Add(NewItem);
+                }
+                if (FileList != null) StatusLabel1.Text = string.Format("{0}개 항목", FileItemInfo.Count);
             }
         }
         private void Select_All_Event(object? sender, EventArgs e) // 전체 선택(&A)Strip 
@@ -374,42 +397,42 @@ namespace FileManager
             {
                 Worker.CancelAsync();
                 FileListView.Items.Clear();
-                Worker.RunWorkerAsync(FolderPath);
             }
             StatusLabel2.Text = string.Empty;
         }
         private void Rename_File_Event(object? sender, EventArgs e) { Rename_File(); } // 이름 바꾸기(&M)Strip 
         private void Rename_File() // 이름 바꾸기 
         {
-            TextBox RenameBox = new();
-            RenameBox.Text = FileListView.SelectedItems[0].SubItems[1].Text;
-            RenameBox.Location = FileListView.SelectedItems[0].SubItems[1].Bounds.Location;
-            RenameBox.TextChanged += RenamerBox_TextChanged;
-            RenameBox.KeyDown += RenamerBox_KeyDown;
-            RenameBox.KeyPress += RenamerBox_KeyPress;
-            RenameBox.Leave += RenamerBox_Leave;
-            FileListView.Controls.Add(RenameBox);
-            RenameBox.BringToFront();
-            RenameBox.Select();
+            TextBox RenamerBox = new();
+            RenamerBox.Text = FileListView.SelectedItems[0].SubItems[1].Text;
+            RenamerBox.Location = FileListView.SelectedItems[0].SubItems[1].Bounds.Location;
+            RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("맑은 고딕", 9F));
+            RenamerBox.TextChanged += RenamerBox_TextChanged;
+            RenamerBox.KeyDown += RenamerBox_KeyDown;
+            RenamerBox.KeyPress += RenamerBox_KeyPress;
+            RenamerBox.Leave += RenamerBox_Leave;
+            FileListView.Controls.Add(RenamerBox);
+            RenamerBox.BringToFront();
+            RenamerBox.Select();
             RenameState = true;
         }
         private void RenamerBox_TextChanged(object? sender, EventArgs e)
         {
-            if (sender is TextBox RenamerBox) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("맑은 고딕", 9F));
+            if (sender is TextBox RenamerBox) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + " ", new Font("맑은 고딕", 9F));
         }
         private void RenamerBox_KeyDown(object? sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Enter) { RenameState = true; FileListView.Controls.RemoveAt(0); }
-            else if (e.KeyCode == Keys.Escape) { RenameState = false; FileListView.Controls.RemoveAt(0); }
+            if (e.KeyCode == Keys.Enter) { RenameState = true; FileListView.Select(); }
+            else if (e.KeyCode == Keys.Escape) { RenameState = false; FileListView.Select(); }
         }
         private void RenamerBox_KeyPress(object? sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true; }
         private void RenamerBox_Leave(object? sender, EventArgs e)
         {
-            if(RenameState)
+            if (RenameState)
             {
-                if(sender is TextBox RenamerBox)
+                if (sender is TextBox RenamerBox)
                 {
-                    if(FolderPath != null)
+                    if (FolderPath != null)
                     {
                         string sourceName, destName;
                         if (FolderPath.Length == 3)
@@ -419,14 +442,31 @@ namespace FileManager
                         }
                         else
                         {
-                            sourceName = FolderPath + '\\' + FileListView.Items[0].SubItems[1].Text;
+                            sourceName = FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
                             destName = FolderPath + '\\' + RenamerBox.Text;
                         }
-                        if(File.Exists(sourceName))
+                        if (File.Exists(sourceName))
                         {
-                            FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
-                            File.Move(sourceName, destName, true);
+                            if (File.Exists(destName) && sourceName != destName)
+                            {
+                                int FileNumber = 1;
+                                if (File.Exists(destName)) FileNumber++;
+                                while (File.Exists(destName + '(' + FileNumber + ')')) FileNumber++;
+                                if (MessageBox.Show(string.Format("이 위치에 이미 {0} 파일이 있습니다. {1}로 변경하시겠습니까?", destName, destName + '(' + FileNumber + ')'), "파일 중복", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                                {
+                                    FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text + '(' + FileNumber + ')';
+                                    FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text + '(' + FileNumber + ')';
+                                    File.Move(sourceName, destName + '(' + FileNumber + ')', true);
+                                }
+                            }
+                            else
+                            {
+                                FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text;
+                                FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
+                                File.Move(sourceName, destName, true);
+                            }
                         }
+                        else Refresh_FileList();
                     }
                 }
             }
@@ -442,7 +482,7 @@ namespace FileManager
                 List<ListViewItem> DeleteFileList = new();
                 ErrorMessage = "선택한 파일이 존재하지 않습니다.\n새로 고침 후 다시 시도해 주세요.\n\n";
                 foreach (ListViewItem items in FileListView.SelectedItems)
-                { 
+                {
                     if (FolderPath.Length == 3) DeleteFileName = FolderPath + items.SubItems[1].Text;
                     else DeleteFileName = FolderPath + '\\' + items.SubItems[1].Text;
                     if (File.Exists(DeleteFileName)) DeleteFileList.Add(items);
@@ -455,18 +495,26 @@ namespace FileManager
                 if (ErrorState) MessageBox.Show(ErrorMessage, "파일 없음");
                 else
                 {
-                    string DeleteMessage = "이 파일을 완전히 삭제하시겠습니까?\n\n";
-                    foreach (ListViewItem delfile in DeleteFileList) DeleteMessage += delfile.SubItems[1].Text + ' ' + delfile.SubItems[5].Text + '\n';
-                    if (MessageBox.Show(DeleteMessage, "파일 삭제", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                    string DeleteMessage = string.Empty;
+                    int DeleteCount = 0; // 삭제할 파일 개수 
+                    foreach (ListViewItem delfile in DeleteFileList)
                     {
-                        foreach(ListViewItem delfile in DeleteFileList)
+                        if (DeleteCount++ < 10) DeleteMessage += delfile.SubItems[1].Text + ' ' + delfile.SubItems[5].Text + '\n';
+                    }
+                    if (DeleteCount > 10) DeleteMessage += "  . . .\n";
+                    DeleteMessage += string.Format("\n위에 파일을 포함한 총 {0}개의 파일을 완전히 삭제하시겠습니까?", DeleteCount);
+                    if (MessageBox.Show(DeleteMessage, "파일 삭제", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                    {
+                        foreach (ListViewItem delfile in DeleteFileList)
                         {
                             if (FolderPath.Length == 3) File.Delete(FolderPath + delfile.SubItems[1].Text);
                             else File.Delete(FolderPath + '\\' + delfile.SubItems[1].Text);
                             FileListView.Items.Remove(delfile);
+                            FileItemInfo.Remove(delfile);
                         }
                     }
                 }
+                if (FileList != null) StatusLabel1.Text = string.Format("{0}개 항목", FileItemInfo.Count);
             }
         }
         private void New_WorkSpace_Event(object? sender, EventArgs e) // 새 작업영역(&S)Strip 
@@ -476,9 +524,9 @@ namespace FileManager
         private void Open_Explorer_Event(object? sender, EventArgs e) // 파일 탐색기에서 열기Strip 
         {
             string OpenFileFullName;
-            if (FolderPath!= null)
+            if (FolderPath != null)
             {
-                if(FileListView.SelectedItems.Count > 0)
+                if (FileListView.SelectedItems.Count > 0)
                 {
                     if (FolderPath.Length == 3) OpenFileFullName = "/select, " + FolderPath + FileListView.SelectedItems[0].SubItems[1].Text;
                     else OpenFileFullName = "/select, " + FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
@@ -496,7 +544,7 @@ namespace FileManager
         #endregion
 
         #region External Component 
-        private void SettingButton_Click(object sender, EventArgs e)
+        private void SettingButton_Click(object sender, EventArgs e) // 설정 버튼 
         {
             FileListView.Select();
             Setting SettingForm = new();
@@ -504,12 +552,12 @@ namespace FileManager
             SettingForm.ShowDialog();
         }
 
-        private void SearchWords_KeyDown(object sender, KeyEventArgs e)
+        private void SearchWords_KeyDown(object sender, KeyEventArgs e) // 검색어 감지 
         {
             if (e.KeyCode == Keys.Enter) FileListView.Focus();
         }
         private void SearchWords_KeyPress(object sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter) e.Handled = true; } // Enter 소리 무음 처리 
-        private void OpenFolderButton_Click(object sender, EventArgs e) { OpenFolder();  } // 폴더 열기Click 
+        private void OpenFolderButton_Click(object sender, EventArgs e) { OpenFolder(); } // 폴더 열기Click 
         private void OpenFolder() // 폴더 열기 
         {
             FileListView.Select();
@@ -543,7 +591,7 @@ namespace FileManager
         private void SearchWords_TextChanged(object sender, EventArgs e) // 검색어 입력 
         {
             if (Worker.IsBusy) return;
-            #pragma warning disable CS8602
+#pragma warning disable CS8602
             int SearchItemSize = 0;
             if (FileItemInfo != null)
             {
@@ -555,7 +603,6 @@ namespace FileManager
                     int resultindex = 0;
                     foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) ResultItems[resultindex++] = items;
                     FileListView.Items.AddRange(ResultItems);
-                    FileListView.Sorting = SortOrder.Ascending;
                     StatusLabel1.Text = string.Format("{0}개 항목", SearchItemSize);
                     IsEmptyWorkSpaceLabel.Hide();
                 }
@@ -566,12 +613,19 @@ namespace FileManager
                     IsEmptyWorkSpaceLabel.Show();
                 }
                 MainUILayout(0);
-                FileListView.Sorting = SortOrder.Ascending;
             }
         }
-        private void ReNameButton_Click(object sender, EventArgs e)
+        private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 버튼 
         {
-            Console.WriteLine("Checked : {0}", FileListView.CheckedItems.Count);
+            Rename rename = new();
+            rename.StartPosition = FormStartPosition.CenterParent;
+            rename.Renamed += Rename_Renamed;
+            rename.ShowDialog();
+        }
+
+        private void Rename_Renamed(PatternMethod Pattern, string Regular)
+        {
+            Console.WriteLine("Pattern : {0}, Regular : {1}", Pattern, Regular);
         }
         #endregion
     }
