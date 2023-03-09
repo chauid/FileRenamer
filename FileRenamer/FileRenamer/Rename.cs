@@ -5,44 +5,16 @@ namespace FileManager
     /// <summary>
     /// 이름 바꾸기 이벤트 핸들러 
     /// </summary>
-    /// <param name="Regular">이름 변경 표현식</param>
+    /// <param name="Regular">이름 변경 표현식(정규식)</param>
     public delegate void RenameEventArgs(string? Regular);
-
-    /// <summary>
-    /// 이름 정규식 정의 : {추가, 삭제, 대체}.
-    /// 정규식 구분자 : "{}"
-    /// </summary>
-    public enum RegularType
-    {
-        /// <summary>
-        /// 문자열 추가. 정규식 활용:{[FileName] or string:Append, "추가할 문자열", 추가할 위치(int), 인덱싱순서(Boolean)}
-        /// </summary>
-        Append = 0,
-
-        /// <summary>
-        /// 문자열 삭제. 정규식 활용:{[FileName] or string:Delete, 삭제할 범위(int), 삭제할 위치(int), 인덱싱순서(Boolean)}
-        /// </summary>
-        Delete = 1,
-
-        /// <summary>
-        /// 문자열 대체. 정규식 활용:{[FileName] or string:Replace, "찾을 문자열", "대체할 문자열"}
-        /// </summary>
-        Replace = 2,
-
-        /// <summary>
-        /// 새로운 문자열 추가. 정규식 활용 : {NewNameSet, "새로운 문자열"}
-        /// </summary>
-        NewNameSet = 3,
-
-        /// <summary>
-        /// 숫자 자동 증가. 정규식 활용 : {AutoIncrement:시작값(int), 증분값(int)}
-        /// </summary>
-        AutoIncrement = 4
-    }
     public partial class Rename : Form
     {
         private bool AdvancedOption = false;
-        private string? Regular;
+
+        /// <summary>
+        /// <b>정규식</b> ex) {RegularType:params}
+        /// </summary>
+        private string Regular = string.Empty;
         public event RenameEventArgs? ExcuteRename;
 
         #region Rename
@@ -60,12 +32,16 @@ namespace FileManager
         }
         #endregion
 
+        #region OKCancel
         private void ChangeButton_Click(object sender, EventArgs e) // 변경 
         {
             ExcuteRename?.Invoke(Regular);
             Close();
         }
         private void CloseButton_Click(object sender, EventArgs e) { Close(); } // 취소 
+        #endregion
+
+        #region Append
         private void AppendRadioButton_CheckedChanged(object sender, EventArgs e) // Append 
         {
             if (AppendRadioButton.Checked)
@@ -93,7 +69,7 @@ namespace FileManager
                     if (AppendBeforeRadioButton.Checked)
                     {
                         AppendTextBox.Hint = "파일명 앞에 추가할 문자열 입력";
-                        if (AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{FileName:Append, \"{0}\", {1}, {2}}}", AppendTextBox.Text, 0, true);
+                        if (AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, true);
                     }
                 };
                 AppendAfterRadioButton.CheckedChanged += delegate (object? sender, EventArgs e)
@@ -101,13 +77,13 @@ namespace FileManager
                     if (AppendAfterRadioButton.Checked)
                     {
                         AppendTextBox.Hint = "파일명 뒤에 추가할 문자열 입력";
-                        if (AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{FileName:Append, \"{0}\", {1}, {2}}}", AppendTextBox.Text, 0, false);
+                        if (AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, false);
                     }
                 };
                 AppendTextBox.TextChanged += delegate (object? sender, EventArgs e)
                 {
-                    if (AppendBeforeRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{FileName:Append, \"{0}\", {1}, {2}}}", AppendTextBox.Text, 0, true);
-                    if (AppendAfterRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{FileName:Append, \"{0}\", {1}, {2}}}", AppendTextBox.Text, 0, false);
+                    if (AppendBeforeRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, true);
+                    if (AppendAfterRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, false);
                     if (AppendTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
                 PatternTextBox.Text = "{FileName}";
@@ -125,6 +101,9 @@ namespace FileManager
                 }
             }
         }
+        #endregion
+
+        #region Delete
         private void DeleteRadioButton_CheckedChanged(object sender, EventArgs e) // Delete 
         {
             if (DeleteRadioButton.Checked)
@@ -142,9 +121,15 @@ namespace FileManager
                     AutoSize = true,
                     Text = "파일명 뒤에서부터 삭제"
                 };
+                Label DeleteNumberLabel = new()
+                {
+                    Location = new Point(70, 62),
+                    Text = "삭제 범위 :",
+                    AutoSize = true
+                };
                 NumericUpDown DeleteNumeric = new()
                 {
-                    Location = new Point(120, 60),
+                    Location = new Point(140, 60),
                     Maximum = 65535,
                     Minimum = 1,
                     Value = 1,
@@ -153,19 +138,20 @@ namespace FileManager
                 };
                 DeleteBeforeRadioButton.CheckedChanged += delegate (object? sender, EventArgs e)
                 {
-                    PatternTextBox.Text = string.Format("{{FileName:Delete, {0}, {1}, {2}}}", DeleteNumeric.Value, 0, true);
+                    PatternTextBox.Text = string.Format("{{Delete:{0}, 0, {1}}}", DeleteNumeric.Value, true);
                 };
                 DeleteAfterRadioButton.CheckedChanged += delegate (object? sender, EventArgs e)
                 {
-                    PatternTextBox.Text = string.Format("{{FileName:Delete, {0}, {1}, {2}}}", DeleteNumeric.Value, 0, false);
+                    PatternTextBox.Text = string.Format("{{Delete:{0}, 0, {1}}}", DeleteNumeric.Value, false);
                 };
                 DeleteNumeric.ValueChanged += delegate (object? sender, EventArgs e)
                 {
-                    if (DeleteBeforeRadioButton.Checked) PatternTextBox.Text = string.Format("{{FileName:Delete, {0}, {1}, {2}}}", DeleteNumeric.Value, 0, true);
-                    if (DeleteAfterRadioButton.Checked) PatternTextBox.Text = string.Format("{{FileName:Delete, {0}, {1}, {2}}}", DeleteNumeric.Value, 0, false);
+                    if (DeleteBeforeRadioButton.Checked) PatternTextBox.Text = string.Format("{{Delete:{0}, 0, {1}}}", DeleteNumeric.Value, true);
+                    if (DeleteAfterRadioButton.Checked) PatternTextBox.Text = string.Format("{{Delete:{0}, 0, {1}}}", DeleteNumeric.Value, false);
                 };
                 DetailOptionPanel.Controls.Add(DeleteBeforeRadioButton);
                 DetailOptionPanel.Controls.Add(DeleteAfterRadioButton);
+                DetailOptionPanel.Controls.Add(DeleteNumberLabel);
                 DetailOptionPanel.Controls.Add(DeleteNumeric);
                 DeleteBeforeRadioButton.Checked = true;
 
@@ -176,6 +162,9 @@ namespace FileManager
                 }
             }
         }
+        #endregion
+
+        #region Replace
         private void ReplaceRadioButton_CheckedChanged(object sender, EventArgs e) // Replace 
         {
             if (ReplaceRadioButton.Checked)
@@ -183,8 +172,8 @@ namespace FileManager
                 DetailOptionPanel.Controls.Clear();
                 MaterialTextBox2 SearchTextBox = new()
                 {
-                    Location = new Point(55, 10),
-                    Hint = "찾은 문자열",
+                    Location = new Point(55, 5),
+                    Hint = "찾을 문자열",
                     AutoSize = true
                 };
                 MaterialTextBox2 ReplaceTextBox = new()
@@ -195,8 +184,13 @@ namespace FileManager
                 };
                 SearchTextBox.TextChanged += delegate (object? sender, EventArgs e)
                 {
-                    if (SearchTextBox.Text != string.Empty && ReplaceTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{FileName:Replace, \"{0}\", \"{1}\"}}", SearchTextBox.Text, ReplaceTextBox.Text);
-                    if (SearchTextBox.Text == string.Empty || ReplaceTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
+                    if (SearchTextBox.Text != string.Empty && ReplaceTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Replace:\"{0}\", \"{1}\"}}", SearchTextBox.Text, ReplaceTextBox.Text);
+                    if (SearchTextBox.Text == string.Empty || ReplaceTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
+                };
+                ReplaceTextBox.TextChanged += delegate (object? sender, EventArgs e)
+                {
+                    if (SearchTextBox.Text != string.Empty && ReplaceTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Replace:\"{0}\", \"{1}\"}}", SearchTextBox.Text, ReplaceTextBox.Text);
+                    if (SearchTextBox.Text == string.Empty || ReplaceTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
                 PatternTextBox.Text = "{FileName}";
                 DetailOptionPanel.Controls.Add(SearchTextBox);
@@ -209,6 +203,9 @@ namespace FileManager
                 }
             }
         }
+        #endregion
+
+        #region NewPattern
         private void NewPatternRadioButton_CheckedChanged(object sender, EventArgs e) // NewPattern 
         {
             if (NewPatternRadioButton.Checked)
@@ -222,13 +219,13 @@ namespace FileManager
                 };
                 Label StartNumberLabel = new()
                 {
-                    Location = new Point(170, 10),
+                    Location = new Point(170, 12),
                     Text = "시작 숫자 :",
                     AutoSize = true
                 };
                 NumericUpDown StartNumber = new()
                 {
-                    Location = new Point(240, 8),
+                    Location = new Point(240, 10),
                     Maximum = 65535,
                     Minimum = 1,
                     Value = 1,
@@ -253,18 +250,26 @@ namespace FileManager
                     {
                         StartNumberLabel.Hide();
                         StartNumber.Hide();
-                        if (NewNameTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, 1, 1);
+                        if (NewNameTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
                     }
                 };
                 StartNumber.ValueChanged += delegate (object? sender, EventArgs e)
                 {
-                    if (NewNameTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, StartNumber.Value, 1);
-                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
+                    if (NewNameTextBox.Text != string.Empty)
+                    {
+                        if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, StartNumber.Value, 1);
+                        else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
+                    }
+                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
                 NewNameTextBox.TextChanged += delegate (object? sender, EventArgs e)
                 {
-                    if (NewNameTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, StartNumber.Value, 1);
-                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
+                    if (NewNameTextBox.Text != string.Empty)
+                    {
+                        if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, StartNumber.Value, 1);
+                        else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
+                    }
+                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
                 PatternTextBox.Text = string.Empty;
                 DetailOptionPanel.Controls.Add(AutoIncrement);
@@ -280,6 +285,7 @@ namespace FileManager
                 }
             }
         }
+        #endregion
 
         private void AdvancedDetailButton_Click(object sender, EventArgs e)
         {
@@ -300,7 +306,6 @@ namespace FileManager
                 AdvancedOption = true;
             }
         }
-
         private void PatternTextBox_TextChanged(object sender, EventArgs e) // Regular Update 
         {
             Regular = PatternTextBox.Text;

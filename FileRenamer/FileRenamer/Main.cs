@@ -5,12 +5,49 @@ using System.Collections;
 using System.ComponentModel;
 using System.Diagnostics;
 
-// 이름 바꾸기 정규식 적용 -> 윈도우 파일 이름 특수 문자 제한 Line : 463 => KeyPress로 해결 
+// TODO LIST v0.9
+// 정규식 오타 예외 처리
+// 정규식 유형 자동 완성
+// Append, Delete, Replace 유형은 정규식에서 1번만 사용 가능. 이 3유형 중 2번 이상 정규식에서 사용시 예외 처리. NewNameSet, AutoIncrement는 중복 사용 가능.
+// 복수선택 이름 변경시 확장자 포함 변경 선택 기능 추가
 
 namespace FileManager
 {
+    /// <summary>
+    /// <para>이름 정규식 유형 : {추가, 삭제, 대체, 새이름 정의, 숫자증분}</para>
+    /// <para>정규식 구분자 : "{}"</para>
+    /// </summary>
+    public enum RegularType
+    {
+        /// <summary>
+        /// 문자열 추가. 정규식 활용:{Append:"추가할 문자열", 추가할 위치(int), 인덱싱순서(Boolean)}
+        /// </summary>
+        Append = 0,
+
+        /// <summary>
+        /// 문자열 삭제. 정규식 활용:{Delete:삭제할 범위(int), 삭제할 위치(int), 인덱싱순서(Boolean)}
+        /// </summary>
+        Delete = 1,
+
+        /// <summary>
+        /// 문자열 대체. 정규식 활용:{Replace:"찾을 문자열", "대체할 문자열"}
+        /// </summary>
+        Replace = 2,
+
+        /// <summary>
+        /// 새로운 문자열 추가. 정규식 활용 : {NewNameSet:"새로운 문자열"}
+        /// </summary>
+        NewNameSet = 3,
+
+        /// <summary>
+        /// 숫자 자동 증가. 정규식 활용 : {AutoIncrement:시작값(int), 증분값(int)}
+        /// </summary>
+        AutoIncrement = 4
+    }
     public partial class Main : Form
     {
+        public const string Version = "0.9";
+
         /// <summary>
         /// ListView 우클릭 메뉴 
         /// </summary>
@@ -408,7 +445,11 @@ namespace FileManager
             }
         }
         private void Rename_File_Event(object? sender, EventArgs e) { Rename_File(); } // 이름 바꾸기(&M)Strip 
-        private void Rename_File() // 이름 바꾸기 
+
+        /// <summary>
+        /// 이름 바꾸기 - 단일선택 
+        /// </summary>
+        private void Rename_File()
         {
             if (FileListView.SelectedItems.Count > 0)
             {
@@ -423,6 +464,64 @@ namespace FileManager
                 RenamerBox.BringToFront();
                 RenamerBox.Select();
                 RenameState = true;
+            }
+        }
+
+        /// <summary>
+        /// 이름 바꾸기 - 복수선택 
+        /// </summary>
+        /// <param name="Regular"><term>정규식 입력 예시</term> {RegularType:params}</param>
+        private void Rename_File(string Regular)
+        {
+            // 정규식 분류 
+            // {} 대분류 => 요소 분류 
+            // : 중분류 => 정규식 유형, 매개변수 분류
+            // , 소분류 => 매개변수 간 분류
+            List<string> Components = new();
+            string Tokens = string.Empty;
+            string[] Params;
+            bool ReadState = false;
+            for (int i = 0; i < Regular.Length; i++)
+            {
+                if (Regular[i] == '{') { ReadState = true; continue; }
+                if (Regular[i] == '}')
+                {
+                    Components.Add(Tokens);
+                    Tokens = string.Empty;
+                    ReadState = false;
+                    continue;
+                }
+                if (ReadState) Tokens += Regular[i];
+            }
+            foreach (string component in Components)
+            {
+                if (component.Split(':').First() == RegularType.Append.ToString())
+                {
+                    Console.WriteLine("Append");
+                    Tokens = component.Split(':').Last();
+                    Params = Tokens.Split(",");
+                    foreach (string param in Params)
+                    {
+                        Console.WriteLine(param.Trim());
+                    }
+                }
+                if (component.Split(':').First() == RegularType.Delete.ToString())
+                {
+                    Console.WriteLine("Delete");
+                }
+                if (component.Split(':').First() == RegularType.Replace.ToString())
+                {
+                    Console.WriteLine("Replace");
+                }
+                if (component.Split(':').First() == RegularType.NewNameSet.ToString())
+                {
+                    Console.WriteLine("NewNameSet");
+                }
+            }
+            Console.WriteLine("\n변경대상 파일");
+            foreach(ListViewItem items in FileListView.CheckedItems)
+            {
+                Console.WriteLine(items.SubItems[1].Text);
             }
         }
         private void RenamerBox_KeyDown(object? sender, KeyEventArgs e)
@@ -561,59 +660,22 @@ namespace FileManager
         }
         #endregion
 
-        #region Renamer
+        #region Rename Event
         private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 폼 열기 
         {
+            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("선택한 파일이 없습니다.", "대상 없음", MessageBoxButtons.OK); return; }
             Rename rename = new();
             rename.StartPosition = FormStartPosition.CenterParent;
             rename.ExcuteRename += Rename_Renamed;
             rename.ShowDialog();
         }
-        private void Rename_Renamed(string? Regular) // 정규식 처리 
+        private void Rename_Renamed(string? Regular) // 이름 바꾸기 폼 이벤트 리스너 
         {
-            Console.WriteLine("Regular : {0}", Regular);
-            List<string> TokenList = new();
-            if (Regular != null)
-            {
-                string SingleToken = string.Empty;
-                bool ReadToken = false;
-                for (int i = 0; i < Regular.Length; i++)
-                {
-                    if (Regular[i] == '{') { ReadToken = true; continue; }
-                    if (Regular[i] == '}')
-                    {
-                        TokenList.Add(SingleToken);
-                        SingleToken = string.Empty;
-                        ReadToken = false;
-                        continue;
-                    }
-                    if (ReadToken) SingleToken += Regular[i];
-                }
-                foreach (string tokens in TokenList)
-                {
-                    Console.WriteLine(tokens);
-                    if(tokens.Split(':').First() == RegularType.Append.ToString())
-                    {
-                        Console.WriteLine("Append");
-                    }
-                    if (tokens.Split(':').First() == RegularType.Delete.ToString())
-                    {
-                        Console.WriteLine("Delete");
-                    }
-                    if (tokens.Split(':').First() == RegularType.Replace.ToString())
-                    {
-                        Console.WriteLine("Replace");
-                    }
-                    if (tokens.Split(':').First() == RegularType.NewNameSet.ToString())
-                    {
-                        Console.WriteLine("NewNameSet");
-                    }
-                }
-            }
+            if (Regular != null) if(Regular.Trim() != string.Empty) Rename_File(Regular);
         }
         #endregion
 
-        #region External Component 
+        #region External UI
         private void SettingButton_Click(object sender, EventArgs e) // 설정 버튼 
         {
             FileListView.Select();
