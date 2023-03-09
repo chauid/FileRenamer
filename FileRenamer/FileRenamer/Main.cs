@@ -32,17 +32,12 @@ namespace FileManager
         private string[]? FileList;
 
         /// <summary>
-        /// 불러온 파일 이름 개수(int) 
-        /// </summary>
-        int FileListCount;
-
-        /// <summary>
         /// 새 폴더 이름 
         /// </summary>
         private string NewFileName = "직박구리";
 
         /// <summary>
-        /// 이름 바꾸기 전 기존 이름  
+        /// 이름 바꾸기 상태  
         /// </summary>
         private bool RenameState;
 
@@ -73,6 +68,12 @@ namespace FileManager
             CheckedBoxTimer.Tick += CheckedBoxTimer_Tick;
             CheckedBoxTimer.Enabled = true;
             FileListView.Select();
+
+            // 종료 이벤트 
+            foreach (Control controls in this.Controls)
+            {
+                controls.KeyDown += KeyDown_Close;
+            }
         }
         private void Main_Load(object sender, EventArgs e) // 초기 화면 설정 
         {
@@ -148,6 +149,10 @@ namespace FileManager
                 ReNameButton.Location = new Point(WorkSpacePanel.Width + 5, 350);
             }
         }
+        private void KeyDown_Close(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) { this.Close(); return; }
+        }
         private void Main_FormClosing(object sender, FormClosingEventArgs e) // 종료 -> BackgroundWorker 종료 
         {
             if (Worker != null) if (Worker.IsBusy) Worker.CancelAsync();
@@ -161,7 +166,7 @@ namespace FileManager
         {
             string FolderPath;
             string[] SearchFile;
-            FileListCount = 0;
+            int FileListCount = 0;
             if (e.Argument is not null) FolderPath = e.Argument.ToString()!;
             else FolderPath = @"C:\";
             DirectoryInfo SelectDirectory = new(FolderPath);
@@ -467,6 +472,7 @@ namespace FileManager
                                 {
                                     FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text + '(' + FileNumber + ')';
                                     FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text + '(' + FileNumber + ')';
+                                    if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = '.' + RenamerBox.Text.Split('.').Last();
                                     File.Move(sourceName, destName + '(' + FileNumber + ')', true);
                                 }
                             }
@@ -474,6 +480,7 @@ namespace FileManager
                             {
                                 FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text;
                                 FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
+                                if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = '.' + RenamerBox.Text.Split('.').Last();
                                 File.Move(sourceName, destName, true);
                             }
                         }
@@ -554,6 +561,58 @@ namespace FileManager
         }
         #endregion
 
+        #region Renamer
+        private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 폼 열기 
+        {
+            Rename rename = new();
+            rename.StartPosition = FormStartPosition.CenterParent;
+            rename.ExcuteRename += Rename_Renamed;
+            rename.ShowDialog();
+        }
+        private void Rename_Renamed(string? Regular) // 정규식 처리 
+        {
+            Console.WriteLine("Regular : {0}", Regular);
+            List<string> TokenList = new();
+            if (Regular != null)
+            {
+                string SingleToken = string.Empty;
+                bool ReadToken = false;
+                for (int i = 0; i < Regular.Length; i++)
+                {
+                    if (Regular[i] == '{') { ReadToken = true; continue; }
+                    if (Regular[i] == '}')
+                    {
+                        TokenList.Add(SingleToken);
+                        SingleToken = string.Empty;
+                        ReadToken = false;
+                        continue;
+                    }
+                    if (ReadToken) SingleToken += Regular[i];
+                }
+                foreach (string tokens in TokenList)
+                {
+                    Console.WriteLine(tokens);
+                    if(tokens.Split(':').First() == RegularType.Append.ToString())
+                    {
+                        Console.WriteLine("Append");
+                    }
+                    if (tokens.Split(':').First() == RegularType.Delete.ToString())
+                    {
+                        Console.WriteLine("Delete");
+                    }
+                    if (tokens.Split(':').First() == RegularType.Replace.ToString())
+                    {
+                        Console.WriteLine("Replace");
+                    }
+                    if (tokens.Split(':').First() == RegularType.NewNameSet.ToString())
+                    {
+                        Console.WriteLine("NewNameSet");
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region External Component 
         private void SettingButton_Click(object sender, EventArgs e) // 설정 버튼 
         {
@@ -624,17 +683,6 @@ namespace FileManager
                 }
                 MainUILayout(0);
             }
-        }
-        private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 폼 열기 
-        {
-            Rename rename = new();
-            rename.StartPosition = FormStartPosition.CenterParent;
-            rename.ExcuteRename += Rename_Renamed;
-            rename.ShowDialog();
-        }
-        private void Rename_Renamed(string? Regular)
-        {
-            Console.WriteLine("Regular : {0}", Regular);
         }
         #endregion
     }

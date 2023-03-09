@@ -28,174 +28,175 @@
         /// </summary>
         private void InitializeComponent()
         {
-            ChangeButton = new Button();
-            AppendRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
-            DeleteRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
-            NewPatternRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
-            ReplaceRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
-            CloseButton = new Button();
-            Divder = new MaterialSkin.Controls.MaterialDivider();
-            DetailOptionPanel = new Panel();
-            PatternTextBox = new TextBox();
-            AdvancedDetailButton = new Button();
-            SuspendLayout();
+            this.ChangeButton = new System.Windows.Forms.Button();
+            this.AppendRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
+            this.DeleteRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
+            this.NewPatternRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
+            this.ReplaceRadioButton = new MaterialSkin.Controls.MaterialRadioButton();
+            this.CloseButton = new System.Windows.Forms.Button();
+            this.Divder = new MaterialSkin.Controls.MaterialDivider();
+            this.DetailOptionPanel = new System.Windows.Forms.Panel();
+            this.PatternTextBox = new System.Windows.Forms.TextBox();
+            this.AdvancedDetailButton = new System.Windows.Forms.Button();
+            this.SuspendLayout();
             // 
             // ChangeButton
             // 
-            ChangeButton.Font = new Font("맑은 고딕", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            ChangeButton.Location = new Point(215, 215);
-            ChangeButton.Name = "ChangeButton";
-            ChangeButton.Size = new Size(85, 30);
-            ChangeButton.TabIndex = 4;
-            ChangeButton.Text = "변경";
-            ChangeButton.UseVisualStyleBackColor = true;
-            ChangeButton.Click += ChangeButton_Click;
+            this.ChangeButton.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ChangeButton.Location = new System.Drawing.Point(215, 215);
+            this.ChangeButton.Name = "ChangeButton";
+            this.ChangeButton.Size = new System.Drawing.Size(85, 30);
+            this.ChangeButton.TabIndex = 4;
+            this.ChangeButton.Text = "변경";
+            this.ChangeButton.UseVisualStyleBackColor = true;
+            this.ChangeButton.Click += new System.EventHandler(this.ChangeButton_Click);
             // 
             // AppendRadioButton
             // 
-            AppendRadioButton.AutoSize = true;
-            AppendRadioButton.Depth = 0;
-            AppendRadioButton.Font = new Font("맑은 고딕", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            AppendRadioButton.Location = new Point(9, 6);
-            AppendRadioButton.Margin = new Padding(0);
-            AppendRadioButton.MouseLocation = new Point(-1, -1);
-            AppendRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
-            AppendRadioButton.Name = "AppendRadioButton";
-            AppendRadioButton.Ripple = true;
-            AppendRadioButton.Size = new Size(139, 37);
-            AppendRadioButton.TabIndex = 0;
-            AppendRadioButton.TabStop = true;
-            AppendRadioButton.Text = "기존 파일명에 추가";
-            AppendRadioButton.UseVisualStyleBackColor = true;
-            AppendRadioButton.CheckedChanged += AppendRadioButton_CheckedChanged;
+            this.AppendRadioButton.AutoSize = true;
+            this.AppendRadioButton.Depth = 0;
+            this.AppendRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.AppendRadioButton.Location = new System.Drawing.Point(9, 6);
+            this.AppendRadioButton.Margin = new System.Windows.Forms.Padding(0);
+            this.AppendRadioButton.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.AppendRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
+            this.AppendRadioButton.Name = "AppendRadioButton";
+            this.AppendRadioButton.Ripple = true;
+            this.AppendRadioButton.Size = new System.Drawing.Size(139, 37);
+            this.AppendRadioButton.TabIndex = 0;
+            this.AppendRadioButton.TabStop = true;
+            this.AppendRadioButton.Text = "기존 파일명에 추가";
+            this.AppendRadioButton.UseVisualStyleBackColor = true;
+            this.AppendRadioButton.CheckedChanged += new System.EventHandler(this.AppendRadioButton_CheckedChanged);
             // 
             // DeleteRadioButton
             // 
-            DeleteRadioButton.AutoSize = true;
-            DeleteRadioButton.Depth = 0;
-            DeleteRadioButton.Font = new Font("맑은 고딕", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            DeleteRadioButton.Location = new Point(196, 6);
-            DeleteRadioButton.Margin = new Padding(0);
-            DeleteRadioButton.MouseLocation = new Point(-1, -1);
-            DeleteRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
-            DeleteRadioButton.Name = "DeleteRadioButton";
-            DeleteRadioButton.Ripple = true;
-            DeleteRadioButton.Size = new Size(151, 37);
-            DeleteRadioButton.TabIndex = 1;
-            DeleteRadioButton.TabStop = true;
-            DeleteRadioButton.Text = "기존 파일명에서 삭제";
-            DeleteRadioButton.UseVisualStyleBackColor = true;
-            DeleteRadioButton.CheckedChanged += DeleteRadioButton_CheckedChanged;
+            this.DeleteRadioButton.AutoSize = true;
+            this.DeleteRadioButton.Depth = 0;
+            this.DeleteRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.DeleteRadioButton.Location = new System.Drawing.Point(196, 6);
+            this.DeleteRadioButton.Margin = new System.Windows.Forms.Padding(0);
+            this.DeleteRadioButton.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.DeleteRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
+            this.DeleteRadioButton.Name = "DeleteRadioButton";
+            this.DeleteRadioButton.Ripple = true;
+            this.DeleteRadioButton.Size = new System.Drawing.Size(151, 37);
+            this.DeleteRadioButton.TabIndex = 1;
+            this.DeleteRadioButton.TabStop = true;
+            this.DeleteRadioButton.Text = "기존 파일명에서 삭제";
+            this.DeleteRadioButton.UseVisualStyleBackColor = true;
+            this.DeleteRadioButton.CheckedChanged += new System.EventHandler(this.DeleteRadioButton_CheckedChanged);
             // 
             // NewPatternRadioButton
             // 
-            NewPatternRadioButton.AutoSize = true;
-            NewPatternRadioButton.Depth = 0;
-            NewPatternRadioButton.Font = new Font("맑은 고딕", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            NewPatternRadioButton.Location = new Point(196, 43);
-            NewPatternRadioButton.Margin = new Padding(0);
-            NewPatternRadioButton.MouseLocation = new Point(-1, -1);
-            NewPatternRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
-            NewPatternRadioButton.Name = "NewPatternRadioButton";
-            NewPatternRadioButton.Ripple = true;
-            NewPatternRadioButton.Size = new Size(146, 37);
-            NewPatternRadioButton.TabIndex = 3;
-            NewPatternRadioButton.TabStop = true;
-            NewPatternRadioButton.Text = "새로운 파일명(고급)";
-            NewPatternRadioButton.UseVisualStyleBackColor = true;
-            NewPatternRadioButton.CheckedChanged += NewPatternRadioButton_CheckedChanged;
+            this.NewPatternRadioButton.AutoSize = true;
+            this.NewPatternRadioButton.Depth = 0;
+            this.NewPatternRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.NewPatternRadioButton.Location = new System.Drawing.Point(196, 43);
+            this.NewPatternRadioButton.Margin = new System.Windows.Forms.Padding(0);
+            this.NewPatternRadioButton.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.NewPatternRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
+            this.NewPatternRadioButton.Name = "NewPatternRadioButton";
+            this.NewPatternRadioButton.Ripple = true;
+            this.NewPatternRadioButton.Size = new System.Drawing.Size(146, 37);
+            this.NewPatternRadioButton.TabIndex = 3;
+            this.NewPatternRadioButton.TabStop = true;
+            this.NewPatternRadioButton.Text = "새로운 파일명(고급)";
+            this.NewPatternRadioButton.UseVisualStyleBackColor = true;
+            this.NewPatternRadioButton.CheckedChanged += new System.EventHandler(this.NewPatternRadioButton_CheckedChanged);
             // 
             // ReplaceRadioButton
             // 
-            ReplaceRadioButton.AutoSize = true;
-            ReplaceRadioButton.Depth = 0;
-            ReplaceRadioButton.Font = new Font("맑은 고딕", 9F, FontStyle.Regular, GraphicsUnit.Point);
-            ReplaceRadioButton.Location = new Point(9, 43);
-            ReplaceRadioButton.Margin = new Padding(0);
-            ReplaceRadioButton.MouseLocation = new Point(-1, -1);
-            ReplaceRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
-            ReplaceRadioButton.Name = "ReplaceRadioButton";
-            ReplaceRadioButton.Ripple = true;
-            ReplaceRadioButton.Size = new Size(151, 37);
-            ReplaceRadioButton.TabIndex = 2;
-            ReplaceRadioButton.TabStop = true;
-            ReplaceRadioButton.Text = "기존 파일명에서 대체";
-            ReplaceRadioButton.UseVisualStyleBackColor = true;
-            ReplaceRadioButton.CheckedChanged += ReplaceRadioButton_CheckedChanged;
+            this.ReplaceRadioButton.AutoSize = true;
+            this.ReplaceRadioButton.Depth = 0;
+            this.ReplaceRadioButton.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ReplaceRadioButton.Location = new System.Drawing.Point(9, 43);
+            this.ReplaceRadioButton.Margin = new System.Windows.Forms.Padding(0);
+            this.ReplaceRadioButton.MouseLocation = new System.Drawing.Point(-1, -1);
+            this.ReplaceRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
+            this.ReplaceRadioButton.Name = "ReplaceRadioButton";
+            this.ReplaceRadioButton.Ripple = true;
+            this.ReplaceRadioButton.Size = new System.Drawing.Size(151, 37);
+            this.ReplaceRadioButton.TabIndex = 2;
+            this.ReplaceRadioButton.TabStop = true;
+            this.ReplaceRadioButton.Text = "기존 파일명에서 대체";
+            this.ReplaceRadioButton.UseVisualStyleBackColor = true;
+            this.ReplaceRadioButton.CheckedChanged += new System.EventHandler(this.ReplaceRadioButton_CheckedChanged);
             // 
             // CloseButton
             // 
-            CloseButton.Font = new Font("맑은 고딕", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            CloseButton.Location = new Point(305, 215);
-            CloseButton.Name = "CloseButton";
-            CloseButton.Size = new Size(85, 30);
-            CloseButton.TabIndex = 5;
-            CloseButton.Text = "취소";
-            CloseButton.UseVisualStyleBackColor = true;
-            CloseButton.Click += CloseButton_Click;
+            this.CloseButton.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.CloseButton.Location = new System.Drawing.Point(305, 215);
+            this.CloseButton.Name = "CloseButton";
+            this.CloseButton.Size = new System.Drawing.Size(85, 30);
+            this.CloseButton.TabIndex = 5;
+            this.CloseButton.Text = "취소";
+            this.CloseButton.UseVisualStyleBackColor = true;
+            this.CloseButton.Click += new System.EventHandler(this.CloseButton_Click);
             // 
             // Divder
             // 
-            Divder.BackColor = Color.FromArgb(30, 0, 0, 0);
-            Divder.Depth = 0;
-            Divder.Location = new Point(8, 83);
-            Divder.MouseState = MaterialSkin.MouseState.HOVER;
-            Divder.Name = "Divder";
-            Divder.Size = new Size(380, 5);
-            Divder.TabIndex = 6;
-            Divder.Text = "materialDivider1";
+            this.Divder.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.Divder.Depth = 0;
+            this.Divder.Location = new System.Drawing.Point(8, 83);
+            this.Divder.MouseState = MaterialSkin.MouseState.HOVER;
+            this.Divder.Name = "Divder";
+            this.Divder.Size = new System.Drawing.Size(380, 5);
+            this.Divder.TabIndex = 6;
+            this.Divder.Text = "materialDivider1";
             // 
             // DetailOptionPanel
             // 
-            DetailOptionPanel.Location = new Point(8, 90);
-            DetailOptionPanel.Name = "DetailOptionPanel";
-            DetailOptionPanel.Size = new Size(380, 110);
-            DetailOptionPanel.TabIndex = 7;
+            this.DetailOptionPanel.Location = new System.Drawing.Point(8, 90);
+            this.DetailOptionPanel.Name = "DetailOptionPanel";
+            this.DetailOptionPanel.Size = new System.Drawing.Size(380, 110);
+            this.DetailOptionPanel.TabIndex = 7;
             // 
             // PatternTextBox
             // 
-            PatternTextBox.Location = new Point(55, 250);
-            PatternTextBox.Name = "PatternTextBox";
-            PatternTextBox.Size = new Size(280, 23);
-            PatternTextBox.TabIndex = 0;
-            PatternTextBox.TextChanged += PatternTextBox_TextChanged;
+            this.PatternTextBox.Location = new System.Drawing.Point(55, 250);
+            this.PatternTextBox.Name = "PatternTextBox";
+            this.PatternTextBox.Size = new System.Drawing.Size(280, 23);
+            this.PatternTextBox.TabIndex = 0;
+            this.PatternTextBox.TextChanged += new System.EventHandler(this.PatternTextBox_TextChanged);
             // 
             // AdvancedDetailButton
             // 
-            AdvancedDetailButton.Location = new Point(10, 210);
-            AdvancedDetailButton.Name = "AdvancedDetailButton";
-            AdvancedDetailButton.Size = new Size(95, 25);
-            AdvancedDetailButton.TabIndex = 1;
-            AdvancedDetailButton.Text = "고급 설정 ∨";
-            AdvancedDetailButton.UseVisualStyleBackColor = true;
-            AdvancedDetailButton.Click += AdvancedDetailButton_Click;
+            this.AdvancedDetailButton.Location = new System.Drawing.Point(10, 210);
+            this.AdvancedDetailButton.Name = "AdvancedDetailButton";
+            this.AdvancedDetailButton.Size = new System.Drawing.Size(95, 25);
+            this.AdvancedDetailButton.TabIndex = 1;
+            this.AdvancedDetailButton.Text = "고급 설정 ∨";
+            this.AdvancedDetailButton.UseVisualStyleBackColor = true;
+            this.AdvancedDetailButton.Click += new System.EventHandler(this.AdvancedDetailButton_Click);
             // 
             // Rename
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.WhiteSmoke;
-            ClientSize = new Size(400, 250);
-            Controls.Add(PatternTextBox);
-            Controls.Add(AdvancedDetailButton);
-            Controls.Add(DetailOptionPanel);
-            Controls.Add(Divder);
-            Controls.Add(CloseButton);
-            Controls.Add(NewPatternRadioButton);
-            Controls.Add(DeleteRadioButton);
-            Controls.Add(ReplaceRadioButton);
-            Controls.Add(AppendRadioButton);
-            Controls.Add(ChangeButton);
-            FormBorderStyle = FormBorderStyle.FixedSingle;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            Name = "Rename";
-            ShowIcon = false;
-            ShowInTaskbar = false;
-            SizeGripStyle = SizeGripStyle.Hide;
-            Text = "이름 바꾸기";
-            ResumeLayout(false);
-            PerformLayout();
+            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.ClientSize = new System.Drawing.Size(400, 250);
+            this.Controls.Add(this.PatternTextBox);
+            this.Controls.Add(this.AdvancedDetailButton);
+            this.Controls.Add(this.DetailOptionPanel);
+            this.Controls.Add(this.Divder);
+            this.Controls.Add(this.CloseButton);
+            this.Controls.Add(this.NewPatternRadioButton);
+            this.Controls.Add(this.DeleteRadioButton);
+            this.Controls.Add(this.ReplaceRadioButton);
+            this.Controls.Add(this.AppendRadioButton);
+            this.Controls.Add(this.ChangeButton);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
+            this.Name = "Rename";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
+            this.Text = "이름 바꾸기";
+            this.ResumeLayout(false);
+            this.PerformLayout();
+
         }
 
         #endregion
