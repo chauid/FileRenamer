@@ -1,4 +1,3 @@
-//using System.ComponentModel;
 using FindImage;
 using MaterialSkin;
 using System.Collections;
@@ -6,10 +5,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 
 // TODO LIST v0.9
+// Rename.cs 특수문자 예외 처리 
 // 정규식 오타 예외 처리
 // 정규식 유형 자동 완성
-// Append, Delete, Replace 유형은 정규식에서 1번만 사용 가능. 이 3유형 중 2번 이상 정규식에서 사용시 예외 처리. NewNameSet, AutoIncrement는 중복 사용 가능.
 // 복수선택 이름 변경시 확장자 포함 변경 선택 기능 추가
+// 특정 단어 앞, 또는 뒤에 문자열 추가
+// Ctrl + Z 기능 추가 
 
 namespace FileManager
 {
@@ -477,19 +478,28 @@ namespace FileManager
             // {} 대분류 => 요소 분류 
             // : 중분류 => 정규식 유형, 매개변수 분류
             // , 소분류 => 매개변수 간 분류
+            string RenameText = string.Empty;
             List<string> Components = new();
             string Tokens = string.Empty;
             string[] Params;
-            bool ReadState = false;
+            bool ReadState = false, SkipParen = false;
             for (int i = 0; i < Regular.Length; i++)
             {
-                if (Regular[i] == '{') { ReadState = true; continue; }
-                if (Regular[i] == '}')
+                if (Regular[i] == '\"')
                 {
-                    Components.Add(Tokens);
-                    Tokens = string.Empty;
-                    ReadState = false;
-                    continue;
+                    if (SkipParen) SkipParen = false;
+                    else SkipParen = true;
+                }
+                if(!SkipParen)
+                {
+                    if (Regular[i] == '{') { ReadState = true; continue; }
+                    if (Regular[i] == '}')
+                    {
+                        Components.Add(Tokens);
+                        Tokens = string.Empty;
+                        ReadState = false;
+                        continue;
+                    }
                 }
                 if (ReadState) Tokens += Regular[i];
             }
@@ -497,13 +507,12 @@ namespace FileManager
             {
                 if (component.Split(':').First() == RegularType.Append.ToString())
                 {
-                    Console.WriteLine("Append");
                     Tokens = component.Split(':').Last();
                     Params = Tokens.Split(",");
-                    foreach (string param in Params)
-                    {
-                        Console.WriteLine(param.Trim());
-                    }
+                    string AppendStr = Params[0].Trim(); // 추가할 문자열
+                    int AppendIndex = int.Parse(Params[1].Trim()); // 추가할 위치
+                    bool Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
+                    Console.WriteLine("Append : {0}, {1}, {2}", AppendStr, AppendIndex, Sequence);
                 }
                 if (component.Split(':').First() == RegularType.Delete.ToString())
                 {
