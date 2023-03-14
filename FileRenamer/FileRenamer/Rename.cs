@@ -23,6 +23,7 @@ namespace FileManager
             InitializeComponent();
             DetailOptionPanel.Select();
             AppendRadioButton.Checked = true;
+            PatternTextBox.KeyPress += KeyPress_RenameTextBox;
 
             // 종료 이벤트 
             foreach (Control controls in this.Controls)
@@ -86,6 +87,7 @@ namespace FileManager
                     if (AppendAfterRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, false);
                     if (AppendTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
+                AppendTextBox.KeyPress += KeyPress_RenameTextBox;
                 PatternTextBox.Text = "{FileName}";
                 DetailOptionPanel.Controls.Add(AppendBeforeRadioButton);
                 DetailOptionPanel.Controls.Add(AppendAfterRadioButton);
@@ -187,11 +189,13 @@ namespace FileManager
                     if (SearchTextBox.Text != string.Empty && ReplaceTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Replace:\"{0}\", \"{1}\"}}", SearchTextBox.Text, ReplaceTextBox.Text);
                     if (SearchTextBox.Text == string.Empty || ReplaceTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
+                SearchTextBox.KeyPress += KeyPress_RenameTextBox;
                 ReplaceTextBox.TextChanged += delegate (object? sender, EventArgs e)
                 {
                     if (SearchTextBox.Text != string.Empty && ReplaceTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Replace:\"{0}\", \"{1}\"}}", SearchTextBox.Text, ReplaceTextBox.Text);
                     if (SearchTextBox.Text == string.Empty || ReplaceTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
+                ReplaceTextBox.KeyPress += KeyPress_RenameTextBox;
                 PatternTextBox.Text = "{FileName}";
                 DetailOptionPanel.Controls.Add(SearchTextBox);
                 DetailOptionPanel.Controls.Add(ReplaceTextBox);
@@ -271,6 +275,7 @@ namespace FileManager
                     }
                     if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
+                NewNameTextBox.KeyPress += KeyPress_RenameTextBox;
                 PatternTextBox.Text = string.Empty;
                 DetailOptionPanel.Controls.Add(AutoIncrement);
                 DetailOptionPanel.Controls.Add(StartNumberLabel);
@@ -313,6 +318,18 @@ namespace FileManager
         private void KeyDown_RenameForm(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape) Close();
+        }
+        private void KeyPress_RenameTextBox(object? sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true;
+
+            // 파일명 유효성 검사 KeyCode 
+            // /,?, |, \, <, >, ", *, :
+            if (e.KeyChar == '/' || e.KeyChar == '?' || e.KeyChar == '|' || e.KeyChar == '\\' || e.KeyChar == '<' || e.KeyChar == '>' || e.KeyChar == '"' || e.KeyChar == '*' || e.KeyChar == ':' || e.KeyChar == '<')
+            {
+                Console.WriteLine("Invalid KeyCode");
+                e.KeyChar = Convert.ToChar(0);
+            }
         }
     }
 }

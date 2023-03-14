@@ -32,9 +32,6 @@
             this.SettingButton = new System.Windows.Forms.Button();
             this.SearchWords = new MaterialSkin.Controls.MaterialTextBox2();
             this.LoadProcessBar = new MaterialSkin.Controls.MaterialProgressBar();
-            this.ADD_TabPage = new System.Windows.Forms.ToolStripMenuItem();
-            this.Delete_TabPage = new System.Windows.Forms.ToolStripMenuItem();
-            this.DeleteAll_TabPage = new System.Windows.Forms.ToolStripMenuItem();
             this.OpenFolderButton = new System.Windows.Forms.Button();
             this.FileListView = new System.Windows.Forms.ListView();
             this.CheckAllList = new System.Windows.Forms.ColumnHeader();
@@ -59,6 +56,7 @@
             this.UpdateCheckToolStrip = new System.Windows.Forms.ToolStripMenuItem();
             this.SettingStripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.TimeSetMasked = new System.Windows.Forms.MaskedTextBox();
+            ContainExtensionSwitch = new MaterialSkin.Controls.MaterialSwitch();
             this.WorkSpacePanel.SuspendLayout();
             this.MenuStrip.SuspendLayout();
             this.SuspendLayout();
@@ -119,21 +117,6 @@
             this.LoadProcessBar.Step = 1;
             this.LoadProcessBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.LoadProcessBar.TabIndex = 3;
-            // 
-            // ADD_TabPage
-            // 
-            this.ADD_TabPage.Name = "ADD_TabPage";
-            this.ADD_TabPage.Size = new System.Drawing.Size(32, 19);
-            // 
-            // Delete_TabPage
-            // 
-            this.Delete_TabPage.Name = "Delete_TabPage";
-            this.Delete_TabPage.Size = new System.Drawing.Size(32, 19);
-            // 
-            // DeleteAll_TabPage
-            // 
-            this.DeleteAll_TabPage.Name = "DeleteAll_TabPage";
-            this.DeleteAll_TabPage.Size = new System.Drawing.Size(32, 19);
             // 
             // OpenFolderButton
             // 
@@ -359,6 +342,21 @@
             this.TimeSetMasked.TabIndex = 17;
             this.TimeSetMasked.ValidatingType = typeof(System.DateTime);
             // 
+            // ContainExtensionSwitch
+            // 
+            ContainExtensionSwitch.AutoSize = true;
+            ContainExtensionSwitch.Depth = 0;
+            ContainExtensionSwitch.Location = new Point(570, 420);
+            ContainExtensionSwitch.Margin = new Padding(0);
+            ContainExtensionSwitch.MouseLocation = new Point(-1, -1);
+            ContainExtensionSwitch.MouseState = MaterialSkin.MouseState.HOVER;
+            ContainExtensionSwitch.Name = "ContainExtensionSwitch";
+            ContainExtensionSwitch.Ripple = true;
+            ContainExtensionSwitch.Size = new Size(150, 37);
+            ContainExtensionSwitch.TabIndex = 0;
+            ContainExtensionSwitch.Text = "확장자 포함 변경";
+            ContainExtensionSwitch.UseVisualStyleBackColor = true;
+            // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -376,6 +374,7 @@
             this.Controls.Add(this.SettingButton);
             this.Controls.Add(this.SearchWords);
             this.Controls.Add(this.WorkSpacePanel);
+            this.Controls.Add(this.ContainExtensionSwitch);
             this.ForeColor = System.Drawing.SystemColors.WindowText;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.MenuStrip;
@@ -399,9 +398,7 @@
         private Button SettingButton;
         private MaterialSkin.Controls.MaterialTextBox2 SearchWords;
         private MaterialSkin.Controls.MaterialProgressBar LoadProcessBar;
-        private ToolStripMenuItem ADD_TabPage;
-        private ToolStripMenuItem Delete_TabPage;
-        private ToolStripMenuItem DeleteAll_TabPage;
+        private MaterialSkin.Controls.MaterialSwitch ContainExtensionSwitch;
         private Button OpenFolderButton;
         private ListView FileListView;
         private Label WorkPathLabel;
