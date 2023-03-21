@@ -49,10 +49,7 @@ E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\bin\Debug\net6.0-windows
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\bin\Debug\net6.0-windows\FileRenamer.pdb
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\bin\Debug\net6.0-windows\MaterialSkin.dll
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.csproj.AssemblyReference.cache
-E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileManager.Main.resources
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.Properties.Resources.resources
-E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileManager.Rename.resources
-E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileManager.Setting.resources
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.csproj.GenerateResource.cache
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.GeneratedMSBuildEditorConfig.editorconfig
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.AssemblyInfoInputs.cache
@@ -64,3 +61,6 @@ E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.pdb
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.genruntimeconfig.cache
 E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\ref\FileRenamer.dll
+E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.Main.resources
+E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.Rename.resources
+E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.Setting.resources

@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace FileManager
+namespace FileRenamer
 {
     public partial class Setting : Form
     {

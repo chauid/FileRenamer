@@ -1,4 +1,4 @@
-﻿namespace FileManager
+﻿namespace FileRenamer
 {
     partial class Setting
     {

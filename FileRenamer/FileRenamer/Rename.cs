@@ -1,6 +1,6 @@
 ﻿using MaterialSkin.Controls;
 
-namespace FileManager
+namespace FileRenamer
 {
     /// <summary>
     /// 이름 바꾸기 이벤트 핸들러 
