@@ -154,9 +154,9 @@
             // 
             // PatternTextBox
             // 
-            PatternTextBox.Location = new Point(40, 250);
+            PatternTextBox.Location = new Point(25, 250);
             PatternTextBox.Name = "PatternTextBox";
-            PatternTextBox.Size = new Size(320, 23);
+            PatternTextBox.Size = new Size(350, 23);
             PatternTextBox.TabIndex = 0;
             PatternTextBox.TextChanged += PatternTextBox_TextChanged;
             // 

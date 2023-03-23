@@ -319,14 +319,20 @@ namespace FileRenamer
                     }
                     if (ReadState) Tokens += Regular[i];
                 }
-
+                double ProgressPercentage;
                 foreach (string targetFiles in SelectedRenameList)
                 {
                     if (FileLoadWorker.CancellationPending == true) { e.Cancel = true; return; }
                     if (FolderPath is string resultName)
                     {
-                        string targetFilesNoExt = targetFiles, FileExt = '.' + targetFiles.Split('.').Last();
-                        targetFilesNoExt = targetFilesNoExt.Remove(targetFilesNoExt.Length - targetFilesNoExt.Split('.').Last().Length - 1);
+                        if (resultName.Length == 3) resultName += '\\';
+                        string targetFilesNoExt = targetFiles, FileExt = string.Empty;
+                        if (targetFiles.Contains('.'))
+                        {
+                            targetFilesNoExt = targetFilesNoExt.Remove(targetFilesNoExt.Length - targetFilesNoExt.Split('.').Last().Length - 1);
+                            FileExt = '.' + targetFiles.Split('.').Last();
+                        }
+                        else targetFilesNoExt = targetFiles;
                         Console.WriteLine($"원본 파일 이름 : {targetFiles}");
                         foreach (string component in Components)
                         {
@@ -347,13 +353,11 @@ namespace FileRenamer
                                     }
                                     if (Sequence)
                                     {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt[..AppendIndex] + AppendStr + targetFilesNoExt[AppendIndex..] + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt[..AppendIndex] + AppendStr + targetFilesNoExt[AppendIndex..] + FileExt;
+                                        resultName += targetFilesNoExt[..AppendIndex] + AppendStr + targetFilesNoExt[AppendIndex..] + FileExt;
                                     }
                                     else
                                     {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt[..^AppendIndex] + AppendStr + targetFilesNoExt[^AppendIndex..] + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt[..^AppendIndex] + AppendStr + targetFilesNoExt[^AppendIndex..] + FileExt;
+                                        resultName += targetFilesNoExt[..^AppendIndex] + AppendStr + targetFilesNoExt[^AppendIndex..] + FileExt;
                                     }
                                 }
                                 else // 확장자 포함
@@ -365,13 +369,11 @@ namespace FileRenamer
                                     }
                                     if (Sequence)
                                     {
-                                        if (resultName.Length == 3) resultName += targetFiles[..AppendIndex] + AppendStr + targetFiles[AppendIndex..];
-                                        else resultName += '\\' + targetFiles[..AppendIndex] + AppendStr + targetFiles[AppendIndex..];
+                                        resultName += targetFiles[..AppendIndex] + AppendStr + targetFiles[AppendIndex..];
                                     }
                                     else
                                     {
-                                        if (resultName.Length == 3) resultName += targetFiles[..^AppendIndex] + AppendStr + targetFiles[^AppendIndex..];
-                                        else resultName += '\\' + targetFiles[..^AppendIndex] + AppendStr + targetFiles[^AppendIndex..];
+                                        resultName += targetFiles[..^AppendIndex] + AppendStr + targetFiles[^AppendIndex..];
                                     }
                                 }
                                 // 축약어 [..^AppendIndex] = Substring(0, targetFile.Length - AppendIndex)
@@ -392,13 +394,11 @@ namespace FileRenamer
                                     }
                                     if (Sequence)
                                     {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
+                                        resultName += targetFilesNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
                                     }
                                     else
                                     {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt.Remove(targetFilesNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt.Remove(targetFilesNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
+                                        resultName += targetFilesNoExt.Remove(targetFilesNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
                                     }
                                 }
                                 else // 확장자 포함
@@ -410,24 +410,37 @@ namespace FileRenamer
                                     }
                                     if (Sequence)
                                     {
-                                        if (resultName.Length == 3) resultName += targetFiles.Remove(DeleteIndex, DeleteRange);
-                                        else resultName += '\\' + targetFiles.Remove(DeleteIndex, DeleteRange);
+                                        resultName += targetFiles.Remove(DeleteIndex, DeleteRange);
                                     }
                                     else
                                     {
-                                        if (resultName.Length == 3) resultName += targetFiles.Remove(targetFiles.Length - DeleteIndex - DeleteRange, DeleteRange);
-                                        else resultName += '\\' + targetFiles.Remove(targetFiles.Length - DeleteIndex - DeleteRange, DeleteRange);
+                                        resultName += targetFiles.Remove(targetFiles.Length - DeleteIndex - DeleteRange, DeleteRange);
                                     }
                                 }
                             }
                             if (component.Split(':').First() == RegularType.Replace.ToString())
                             {
-                                Console.WriteLine("Replace");
-
+                                Tokens = component.Split(':').Last();
+                                Params = Tokens.Split(",");
+                                string FindString = Params[0].Trim().Trim('"'); // 찾을 문자열
+                                string ReplaceString = Params[1].Trim().Trim('"'); // 대체할 문자열
+                                Console.WriteLine("찾을 문자열 : {0}, 대체할 문자열 : {1}", FindString, ReplaceString);
                             }
                             if (component.Split(':').First() == RegularType.NewNameSet.ToString())
                             {
-                                Console.WriteLine("NewNameSet");
+                                Tokens = component.Split(':').Last();
+                                Params = Tokens.Split(",");
+                                string NewNameSet = Params[0].Trim().Trim('"');
+                                Console.WriteLine("새 문자열 규칙 : {0}", NewNameSet);
+                            }
+                            if(component.Split(":").First() == RegularType.AutoIncrement.ToString())
+                            {
+                                Tokens = component.Split(":").Last();
+                                Params = Tokens.Split(",");
+                                int StartValue = int.Parse(Params[0].Trim());
+                                int IncrementValue = int.Parse(Params[1].Trim());
+                                Console.WriteLine("시작값 : {0}, 증분값 : {1}", StartValue, IncrementValue);
+                                
                             }
                         }
                         if (FolderPath != null)
@@ -438,7 +451,7 @@ namespace FileRenamer
                             Console.WriteLine($"From:{sourceName}, To:{resultName}");
                             if (File.Exists(resultName)) FileNumber++;
                             if (FileNumber > 0) // 중복 발생
-                            { // 여기서부터 시작
+                            {
                                 if (ContainExtensionSwitch.Checked)
                                 {
 
@@ -453,6 +466,8 @@ namespace FileRenamer
                             }
                         }
                     }
+                    ProgressPercentage = ++ProgressCounter / (double)SelectedRenameList.Count * 100;
+                    FileRenameWorker.ReportProgress((int)ProgressPercentage);
                 }
             }
         }

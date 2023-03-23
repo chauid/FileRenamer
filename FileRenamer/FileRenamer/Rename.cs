@@ -238,9 +238,15 @@ namespace FileRenamer
                 };
                 MaterialTextBox2 NewNameTextBox = new()
                 {
-                    Location = new Point(55, 60),
-                    Hint = "새로운 파일명 입력",
-                    AutoSize = true
+                    Location = new Point(20, 60),
+                    Size = new Size(220, 48),
+                    Hint = "새로운 파일명 입력"
+                };
+                MaterialTextBox2 ExtensionTextBox = new()
+                {
+                    Location = new Point(260, 60),
+                    Size = new Size(100, 48),
+                    Hint = "확장자 입력"
                 };
                 AutoIncrement.CheckedChanged += delegate (object? sender, EventArgs e)
                 {
@@ -270,8 +276,33 @@ namespace FileRenamer
                 {
                     if (NewNameTextBox.Text != string.Empty)
                     {
-                        if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, {2}}}", NewNameTextBox.Text, StartNumber.Value, 1);
-                        else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
+                        if (ExtensionTextBox.Text != string.Empty)
+                        {
+                            if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, 1}}{{NewNameSet:\".{2}\"}}", NewNameTextBox.Text, StartNumber.Value, ExtensionTextBox.Text);
+                            else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}{{NewNameSet:\"{1}\"}}", NewNameTextBox.Text, ExtensionTextBox.Text);
+                        }
+                        else
+                        {
+                            if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, 1}}", NewNameTextBox.Text, StartNumber.Value);
+                            else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
+                        }
+                    }
+                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
+                };
+                ExtensionTextBox.TextChanged += delegate (object? sender, EventArgs e)
+                {
+                    if (NewNameTextBox.Text != string.Empty)
+                    {
+                        if (ExtensionTextBox.Text != string.Empty)
+                        {
+                            if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, 1}}{{NewNameSet:\".{2}\"}}", NewNameTextBox.Text, StartNumber.Value, ExtensionTextBox.Text);
+                            else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}{{NewNameSet:\"{1}\"}}", NewNameTextBox.Text, ExtensionTextBox.Text);
+                        }
+                        else
+                        {
+                            if (AutoIncrement.Checked) PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:{1}, 1}}", NewNameTextBox.Text, StartNumber.Value);
+                            else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
+                        }
                     }
                     if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
                 };
@@ -281,6 +312,7 @@ namespace FileRenamer
                 DetailOptionPanel.Controls.Add(StartNumberLabel);
                 DetailOptionPanel.Controls.Add(StartNumber);
                 DetailOptionPanel.Controls.Add(NewNameTextBox);
+                DetailOptionPanel.Controls.Add(ExtensionTextBox);
                 AutoIncrement.Checked = true;
 
                 // 종료 이벤트 
