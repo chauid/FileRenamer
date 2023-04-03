@@ -41,23 +41,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\USER\\.nuget\\packages\\": {},
+    "C:\\Users\\dlfdl\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\USER\\Desktop\\git\\FileRenamer\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
+      "projectUniqueName": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
       "projectName": "FileRenamer",
-      "projectPath": "C:\\Users\\USER\\Desktop\\git\\FileRenamer\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
-      "packagesPath": "C:\\Users\\USER\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\USER\\Desktop\\git\\FileRenamer\\FileRenamer\\FileRenamer\\obj\\",
+      "projectPath": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
+      "packagesPath": "C:\\Users\\dlfdl\\.nuget\\packages\\",
+      "outputPath": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\USER\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\dlfdl\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -111,5 +111,13 @@
         "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.202\\RuntimeIdentifierGraph.json"
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "Undefined",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "캐시 파일 E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer\\obj\\project.nuget.cache을(를) 읽는 동안 문제가 발생했습니다. Invalid property identifier character: <. Path 'version', line 3, position 0."
+    }
+  ]
 }
