@@ -2,6 +2,7 @@ using FindImage;
 using MaterialSkin;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 // TODO LIST v0.9
 // 정규식 오타 예외 처리
@@ -132,6 +133,20 @@ namespace FileRenamer
             {
                 controls.KeyDown += KeyDown_Close;
             }
+
+
+            string input = "{aa:\"Hi my bi\\\"g jaji\"}";
+            string pattern = "\"(.*)\""; // 큰 따옴표로 묶인 문자열 패턴
+            Regex regex = new Regex(pattern);
+            Match match = regex.Match(input);
+
+            if (match.Success)
+            {
+                string result = match.Groups[1].Value;
+                result = result.Replace("\\\"", "\""); // 이중 따옴표를 큰 따옴표로 변경
+                Console.WriteLine(result);
+            }
+
         }
         private void Main_Load(object sender, EventArgs e) // 초기 화면 설정 
         {
@@ -319,139 +334,142 @@ namespace FileRenamer
                     }
                     if (ReadState) Tokens += Regular[i];
                 }
-
-                foreach (string targetFiles in SelectedRenameList)
+                int Repetition = 0; // 모든 항목에 대한 반복 수
+                foreach (string FileFullName in SelectedRenameList) // 선택한 모든 항목에 대하여
                 {
                     if (FileLoadWorker.CancellationPending == true) { e.Cancel = true; return; }
-                    if (FolderPath is string resultName)
+                    if (FolderPath is string FilePath)
                     {
-                        string targetFilesNoExt = targetFiles, FileExt = '.' + targetFiles.Split('.').Last();
-                        targetFilesNoExt = targetFilesNoExt.Remove(targetFilesNoExt.Length - targetFilesNoExt.Split('.').Last().Length - 1);
-                        Console.WriteLine($"원본 파일 이름 : {targetFiles}");
-                        foreach (string component in Components)
+                        string FileNameNoExt = FileFullName, FileExt = string.Empty, ResultName = string.Empty;
+                        if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.' 포함
+                        {
+                            FileExt = '.' + FileFullName.Split('.').Last();
+                            FileNameNoExt = FileFullName.Remove(FileFullName.Length - FileExt.Length);
+                        }
+                        // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
+                        foreach (string component in Components) // 요소 분류
                         {
                             if (component.Split(':').First() == RegularType.Append.ToString())
                             {
-                                Tokens = component.Split(':').Last();
-                                Params = Tokens.Split(",");
+                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                Params = Tokens.Split(','); // 매개변수 간 분류
                                 string AppendStr = Params[0].Trim().Trim('"'); // 추가할 문자열
                                 int AppendIndex = int.Parse(Params[1].Trim()); // 추가할 위치
                                 bool Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
-                                if (!ContainExtensionSwitch.Checked && targetFiles.Contains('.')) // 확장자 미포함 : 기본값
-                                {
 
-                                    if (AppendIndex > targetFilesNoExt.Length || AppendIndex < 0)
-                                    {
-                                        MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{targetFiles}"), "변경 중단!", MessageBoxButtons.OK);
-                                        e.Cancel = true; return;
-                                    }
-                                    if (Sequence)
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt[..AppendIndex] + AppendStr + targetFilesNoExt[AppendIndex..] + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt[..AppendIndex] + AppendStr + targetFilesNoExt[AppendIndex..] + FileExt;
-                                    }
-                                    else
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt[..^AppendIndex] + AppendStr + targetFilesNoExt[^AppendIndex..] + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt[..^AppendIndex] + AppendStr + targetFilesNoExt[^AppendIndex..] + FileExt;
-                                    }
-                                }
-                                else // 확장자 포함
+                                if (AppendIndex > FileNameNoExt.Length || AppendIndex < 0) // 인덱스 에러 예외처리
                                 {
-                                    if (AppendIndex > targetFiles.Length || AppendIndex < 0)
-                                    {
-                                        MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{targetFiles}"), "변경 중단!", MessageBoxButtons.OK);
-                                        e.Cancel = true; return;
-                                    }
-                                    if (Sequence)
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFiles[..AppendIndex] + AppendStr + targetFiles[AppendIndex..];
-                                        else resultName += '\\' + targetFiles[..AppendIndex] + AppendStr + targetFiles[AppendIndex..];
-                                    }
-                                    else
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFiles[..^AppendIndex] + AppendStr + targetFiles[^AppendIndex..];
-                                        else resultName += '\\' + targetFiles[..^AppendIndex] + AppendStr + targetFiles[^AppendIndex..];
-                                    }
+                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK);
+                                    e.Cancel = true; return;
                                 }
-                                // 축약어 [..^AppendIndex] = Substring(0, targetFile.Length - AppendIndex)
+                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
+                                {
+                                    if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..] + FileExt;
+                                    else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..] + FileExt;
+                                }
+                                else // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
+                                {
+                                    if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..];
+                                    else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..];
+                                    // 축약어 [..^AppendIndex] = Substring(0, targetFile.Length - AppendIndex)
+                                }
                             }
                             if (component.Split(':').First() == RegularType.Delete.ToString())
                             {
-                                Tokens = component.Split(':').Last();
-                                Params = Tokens.Split(",");
+                                Tokens = component.Split(':').Last();// 정규식 유형, 매개변수 분류
+                                Params = Tokens.Split(','); // 매개변수 간 분류
                                 int DeleteRange = int.Parse(Params[0].Trim()); // 삭제할 범위
                                 int DeleteIndex = int.Parse(Params[1].Trim()); // 삭제할 위치
                                 bool Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
-                                if (!ContainExtensionSwitch.Checked && targetFiles.Contains('.')) // 확장자 미포함 : 기본값
+
+                                if (DeleteIndex + DeleteRange > FileNameNoExt.Length || DeleteIndex < 0) // 인덱스 에러 예외처리
                                 {
-                                    if (DeleteIndex + DeleteRange > targetFilesNoExt.Length || DeleteIndex < 0)
-                                    {
-                                        MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{targetFiles}"), "변경 중단!", MessageBoxButtons.OK);
-                                        e.Cancel = true; return;
-                                    }
-                                    if (Sequence)
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
-                                    }
-                                    else
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFilesNoExt.Remove(targetFilesNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
-                                        else resultName += '\\' + targetFilesNoExt.Remove(targetFilesNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
-                                    }
+                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK);
+                                    e.Cancel = true; return;
                                 }
-                                else // 확장자 포함
+                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
                                 {
-                                    if (DeleteIndex + DeleteRange > targetFiles.Length || DeleteIndex < 0)
-                                    {
-                                        MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{targetFiles}"), "변경 중단!", MessageBoxButtons.OK);
-                                        e.Cancel = true; return;
-                                    }
-                                    if (Sequence)
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFiles.Remove(DeleteIndex, DeleteRange);
-                                        else resultName += '\\' + targetFiles.Remove(DeleteIndex, DeleteRange);
-                                    }
-                                    else
-                                    {
-                                        if (resultName.Length == 3) resultName += targetFiles.Remove(targetFiles.Length - DeleteIndex - DeleteRange, DeleteRange);
-                                        else resultName += '\\' + targetFiles.Remove(targetFiles.Length - DeleteIndex - DeleteRange, DeleteRange);
-                                    }
+                                    if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
+                                    else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
+                                }
+                                else // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
+                                {
+                                    if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange);
+                                    else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange);
                                 }
                             }
                             if (component.Split(':').First() == RegularType.Replace.ToString())
                             {
-                                Console.WriteLine("Replace");
+                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                Params = Tokens.Split(','); // 매개변수 간 분류
+                                string SearchStr = Params[0].Trim().Trim('"'); // 찾을 문자열
+                                string ReplaceStr = Params[1].Trim().Trim('"'); // 대체할 문자열
 
+                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
+                                {
+                                    if(FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr) + FileExt;
+                                }
+                                else // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
+                                {
+                                    if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr);
+                                }
                             }
                             if (component.Split(':').First() == RegularType.NewNameSet.ToString())
                             {
-                                Console.WriteLine("NewNameSet");
+                                // 매개변수 간 분류 없음
+                                string NewStr = component.Split(':').Last().Trim().Trim('"'); // 새로운 문자열
+                                ResultName += NewStr;
+                            }
+                            if(component.Split(':').First() == RegularType.AutoIncrement.ToString())
+                            {
+                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                Params = Tokens.Split(','); // 매개변수 간 분류
+                                int StartNumber = int.Parse(Params[0].Trim());
+                                int Increment = int.Parse(Params[1].Trim());
+                                int CurrentNumber = StartNumber + Increment * Repetition++;
+                                ResultName += CurrentNumber.ToString();
+                                Console.WriteLine($"StartNumber:{StartNumber}, Increment;{Increment}, Repetition:{Repetition}");
                             }
                         }
-                        if (FolderPath != null)
+
+                        /* 이름변경 실행 */
+                        string SourceName = string.Empty; int FileNumber = 1;
+                        if (ResultName.Length > 0)
                         {
-                            string sourceName; int FileNumber = 0;
-                            if (FolderPath.Length == 3) sourceName = FolderPath + targetFiles;
-                            else sourceName = FolderPath + '\\' + targetFiles;
-                            Console.WriteLine($"From:{sourceName}, To:{resultName}");
-                            if (File.Exists(resultName)) FileNumber++;
-                            if (FileNumber > 0) // 중복 발생
-                            { // 여기서부터 시작
-                                if (ContainExtensionSwitch.Checked)
-                                {
-
-                                }
-                                while (File.Exists(resultName + '(' + FileNumber.ToString() + ')')) FileNumber++;
-
+                            if (FilePath.Length == 3)
+                            {
+                                SourceName = FilePath + FileFullName;
+                                ResultName = FilePath + ResultName;
                             }
                             else
                             {
-                                if(ContainExtensionSwitch.Checked) File.Move(sourceName, resultName + '(' + FileNumber.ToString() + ')', false);
-                                else File.Move(sourceName, resultName + '(' + FileNumber.ToString() + ')', false);
+                                SourceName = FilePath + '\\' + FileFullName;
+                                ResultName = FilePath + '\\' + ResultName;
                             }
                         }
+                        else
+                        {
+                            MessageBox.Show("아무것도 변경되지 않았습니다.", "변경 취소!", MessageBoxButtons.OK);
+                            e.Cancel = true; return;
+                        }
+                        Console.WriteLine($"From:{SourceName}, To:{ResultName}");
+                        if (File.Exists(ResultName)) FileNumber++;
+                        if (FileNumber > 1) // 중복 발생
+                        {
+                            if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
+                            {
+                                while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++; // 파일 중복 검사
+                                Console.WriteLine("최종 결정 파일명 : {0}", ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt);
+                                File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
+                            }
+                            else // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
+                            {
+                                while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++; // 파일 중복 검사
+                                Console.WriteLine("최종 결정 파일명 : {0}", ResultName + '(' + FileNumber.ToString() + ')');
+                                File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
+                            }
+                        }
+                        else File.Move(SourceName, ResultName, false);
                     }
                 }
             }
@@ -601,8 +619,7 @@ namespace FileRenamer
         {
             if (FolderPath != null)
             {
-                Console.WriteLine(FolderPath);
-                string NewFileFull = FolderPath + "\\" + NewFileName;
+                string NewFileFull = FolderPath + '\\' + NewFileName;
                 int FileNumber = 1;
                 if (File.Exists(NewFileFull)) FileNumber++;
                 while (File.Exists(NewFileFull + '(' + FileNumber.ToString() + ')')) FileNumber++;
@@ -715,49 +732,55 @@ namespace FileRenamer
             {
                 if (sender is TextBox RenamerBox)
                 {
+                    while (RenamerBox.Text.Last() == '.') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // 마지막 '.' 삭제
+                    while (RenamerBox.Text.First() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(0, 1); // 처음 ' ' 삭제
+                    while (RenamerBox.Text.Last() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // 마직막 ' ' 삭제
                     if (FolderPath != null && RenamerBox.Text != string.Empty)
                     {
-                        string sourceName, destName, destNameNoExt = string.Empty;
+                        string SourceName, ResultName;
                         if (FolderPath.Length == 3)
                         {
-                            sourceName = FolderPath + FileListView.SelectedItems[0].SubItems[1].Text;
-                            destName = FolderPath + RenamerBox.Text;
+                            SourceName = FolderPath + FileListView.SelectedItems[0].SubItems[1].Text;
+                            ResultName = FolderPath + RenamerBox.Text;
                         }
                         else
                         {
-                            sourceName = FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
-                            destName = FolderPath + '\\' + RenamerBox.Text;
+                            SourceName = FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
+                            ResultName = FolderPath + '\\' + RenamerBox.Text;
                         }
-                        if (File.Exists(sourceName))
+                        if (SourceName == ResultName) { FileListView.Controls.RemoveAt(0); return; } // 변경 전 이름 == 변경 후 이름 => return
+                        string FileNameNoExt = RenamerBox.Text, FileExt = string.Empty;
+                        if (RenamerBox.Text.Contains('.'))
                         {
-                            for (int i = 0; i < destName.Split('.').Length - 1; i++) destNameNoExt += destName.Split('.')[i];
-                            if (File.Exists(destName) && sourceName != destName)
+                            FileExt = '.' + RenamerBox.Text.Split('.').Last();
+                            FileNameNoExt = RenamerBox.Text.Remove(RenamerBox.Text.Length - FileExt.Length);
+                        }
+                        if (File.Exists(SourceName))
+                        {
+                            int FileNumber = 1;
+                            if (File.Exists(ResultName)) FileNumber++; // 파일 중복
+                            if (FileNumber > 1)
                             {
-                                int FileNumber = 1;
-                                if (File.Exists(destName)) FileNumber++;
-                                if (destName.Contains('.'))
+                                if (ResultName.Contains('.'))
                                 {
-                                    while (File.Exists(destNameNoExt + '(' + FileNumber + ")." + destName.Split('.').Last())) FileNumber++;
-                                    if (MessageBox.Show(string.Format("이 위치에 이미 {0} 파일이 있습니다. {1}로 변경하시겠습니까?", destName, destNameNoExt + '(' + FileNumber + ")." + destName.Split('.').Last()), "파일 중복", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                                    while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++;
+                                    if (MessageBox.Show(string.Format("이 위치에 이미 {0} 파일이 있습니다. {1}로 변경하시겠습니까?", RenamerBox.Text, FileNameNoExt + '(' + FileNumber.ToString() + ')' + FileExt), "파일 중복", MessageBoxButtons.OKCancel) == DialogResult.OK)
                                     {
-                                        string ResultNameNoExt = string.Empty, Extension = RenamerBox.Text.Split('.').Last();
-                                        for (int i = 0; i < RenamerBox.Text.Split('.').Length - 1; i++) ResultNameNoExt += RenamerBox.Text.Split('.')[i];
-                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = ResultNameNoExt + '(' + FileNumber + ")." + Extension;
-                                        FileListView.SelectedItems[0].SubItems[1].Text = ResultNameNoExt + '(' + FileNumber + ")." + Extension;
-                                        if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = '.' + Extension;
-                                        File.Move(sourceName, destNameNoExt + '(' + FileNumber + ")." + Extension, false);
-                                        Console.WriteLine("{0} to {1}", sourceName, destNameNoExt + '(' + FileNumber + ")." + Extension);
+                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
+                                        FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
+                                        FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
+                                        File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
                                     }
                                 }
-                                else // 확장자 없음
+                                else
                                 {
-                                    while (File.Exists(destNameNoExt + '(' + FileNumber + ')')) FileNumber++;
-                                    if (MessageBox.Show(string.Format("이 위치에 이미 {0} 파일이 있습니다. {1}로 변경하시겠습니까?", destName, destName + '(' + FileNumber + ')'), "파일 중복", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                                    while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++;
+                                    if (MessageBox.Show(string.Format("이 위치에 이미 {0} 파일이 있습니다. {1}로 변경하시겠습니까?", RenamerBox.Text, ResultName + '(' + FileNumber.ToString() + ')'), "파일 중복", MessageBoxButtons.OKCancel) == DialogResult.OK)
                                     {
-                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text + '(' + FileNumber + ')';
-                                        FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text + '(' + FileNumber + ')';
-                                        if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = '.' + RenamerBox.Text.Split('.').Last();
-                                        File.Move(sourceName, destName + '(' + FileNumber + ')', false);
+                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
+                                        FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
+                                        FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
+                                        File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
                                     }
                                 }
                             }
@@ -765,8 +788,9 @@ namespace FileRenamer
                             {
                                 FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text;
                                 FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
-                                if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = '.' + RenamerBox.Text.Split('.').Last();
-                                File.Move(sourceName, destName, false);
+                                if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
+                                else FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
+                                File.Move(SourceName, ResultName, false);
                             }
                         }
                         else Refresh_FileList();

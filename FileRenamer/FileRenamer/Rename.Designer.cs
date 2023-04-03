@@ -38,17 +38,23 @@
             DetailOptionPanel = new Panel();
             PatternTextBox = new TextBox();
             AdvancedDetailButton = new Button();
+            PreviewButton = new Button();
             SuspendLayout();
             // 
             // ChangeButton
             // 
+            ChangeButton.BackColor = Color.LightGreen;
+            ChangeButton.FlatAppearance.BorderSize = 0;
+            ChangeButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
+            ChangeButton.FlatAppearance.MouseOverBackColor = Color.LawnGreen;
+            ChangeButton.FlatStyle = FlatStyle.Flat;
             ChangeButton.Font = new Font("맑은 고딕", 10F, FontStyle.Regular, GraphicsUnit.Point);
             ChangeButton.Location = new Point(215, 215);
             ChangeButton.Name = "ChangeButton";
             ChangeButton.Size = new Size(85, 30);
             ChangeButton.TabIndex = 4;
             ChangeButton.Text = "변경";
-            ChangeButton.UseVisualStyleBackColor = true;
+            ChangeButton.UseVisualStyleBackColor = false;
             ChangeButton.Click += ChangeButton_Click;
             // 
             // AppendRadioButton
@@ -98,10 +104,10 @@
             NewPatternRadioButton.MouseState = MaterialSkin.MouseState.HOVER;
             NewPatternRadioButton.Name = "NewPatternRadioButton";
             NewPatternRadioButton.Ripple = true;
-            NewPatternRadioButton.Size = new Size(146, 37);
+            NewPatternRadioButton.Size = new Size(111, 37);
             NewPatternRadioButton.TabIndex = 3;
             NewPatternRadioButton.TabStop = true;
-            NewPatternRadioButton.Text = "새로운 파일명(고급)";
+            NewPatternRadioButton.Text = "새로운 파일명";
             NewPatternRadioButton.UseVisualStyleBackColor = true;
             NewPatternRadioButton.CheckedChanged += NewPatternRadioButton_CheckedChanged;
             // 
@@ -125,13 +131,18 @@
             // 
             // CloseButton
             // 
+            CloseButton.BackColor = Color.Goldenrod;
+            CloseButton.FlatAppearance.BorderSize = 0;
+            CloseButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
+            CloseButton.FlatAppearance.MouseOverBackColor = Color.Salmon;
+            CloseButton.FlatStyle = FlatStyle.Flat;
             CloseButton.Font = new Font("맑은 고딕", 10F, FontStyle.Regular, GraphicsUnit.Point);
             CloseButton.Location = new Point(305, 215);
             CloseButton.Name = "CloseButton";
             CloseButton.Size = new Size(85, 30);
             CloseButton.TabIndex = 5;
             CloseButton.Text = "취소";
-            CloseButton.UseVisualStyleBackColor = true;
+            CloseButton.UseVisualStyleBackColor = false;
             CloseButton.Click += CloseButton_Click;
             // 
             // Divder
@@ -162,13 +173,32 @@
             // 
             // AdvancedDetailButton
             // 
+            AdvancedDetailButton.BackColor = Color.LightSteelBlue;
+            AdvancedDetailButton.FlatAppearance.BorderSize = 0;
+            AdvancedDetailButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
+            AdvancedDetailButton.FlatAppearance.MouseOverBackColor = Color.Aqua;
+            AdvancedDetailButton.FlatStyle = FlatStyle.Flat;
             AdvancedDetailButton.Location = new Point(10, 210);
             AdvancedDetailButton.Name = "AdvancedDetailButton";
             AdvancedDetailButton.Size = new Size(95, 25);
             AdvancedDetailButton.TabIndex = 1;
             AdvancedDetailButton.Text = "고급 설정 ∨";
-            AdvancedDetailButton.UseVisualStyleBackColor = true;
+            AdvancedDetailButton.UseVisualStyleBackColor = false;
             AdvancedDetailButton.Click += AdvancedDetailButton_Click;
+            // 
+            // PreviewButton
+            // 
+            PreviewButton.BackColor = Color.LightSteelBlue;
+            PreviewButton.FlatAppearance.BorderSize = 0;
+            PreviewButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
+            PreviewButton.FlatAppearance.MouseOverBackColor = Color.Aqua;
+            PreviewButton.FlatStyle = FlatStyle.Flat;
+            PreviewButton.Location = new Point(110, 210);
+            PreviewButton.Name = "PreviewButton";
+            PreviewButton.Size = new Size(80, 25);
+            PreviewButton.TabIndex = 8;
+            PreviewButton.Text = "미리보기";
+            PreviewButton.UseVisualStyleBackColor = false;
             // 
             // Rename
             // 
@@ -176,6 +206,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
             ClientSize = new Size(400, 250);
+            Controls.Add(PreviewButton);
             Controls.Add(PatternTextBox);
             Controls.Add(AdvancedDetailButton);
             Controls.Add(DetailOptionPanel);
@@ -210,5 +241,6 @@
         private Panel DetailOptionPanel;
         private TextBox PatternTextBox;
         private Button AdvancedDetailButton;
+        private Button PreviewButton;
     }
 }
