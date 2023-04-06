@@ -2,9 +2,9 @@ using FindImage;
 using MaterialSkin;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text.RegularExpressions;
 
 // TODO LIST v0.9
+// 아무것도 변경 안 되면 새로고침 안 하기 -> BackgroundWorker Complete 변수 추가
 // 정규식 오타 예외 처리
 // 정규식 유형 자동 완성
 // 복수선택 이름 변경시 확장자 포함 변경 선택 기능 추가
@@ -128,25 +128,17 @@ namespace FileRenamer
             CheckedBoxTimer.Enabled = true;
             FileListView.Select();
 
+            // DatePicker
+            DatePicker.Value = DateTime.Now;
+
+            // DatePicker
+            TimeSetMasked.Text = "0000";
+
             // 종료 이벤트 
             foreach (Control controls in this.Controls)
             {
                 controls.KeyDown += KeyDown_Close;
             }
-
-
-            string input = "{aa:\"Hi my bi\\\"g jaji\"}";
-            string pattern = "\"(.*)\""; // 큰 따옴표로 묶인 문자열 패턴
-            Regex regex = new Regex(pattern);
-            Match match = regex.Match(input);
-
-            if (match.Success)
-            {
-                string result = match.Groups[1].Value;
-                result = result.Replace("\\\"", "\""); // 이중 따옴표를 큰 따옴표로 변경
-                Console.WriteLine(result);
-            }
-
         }
         private void Main_Load(object sender, EventArgs e) // 초기 화면 설정 
         {
@@ -253,10 +245,19 @@ namespace FileRenamer
             string FolderPath;
             string[] SearchFile;
             int FileListCount = 0;
-            if (e.Argument is not null) FolderPath = e.Argument.ToString()!;
+            if (e.Argument != null) FolderPath = e.Argument.ToString()!;
             else FolderPath = @"C:\";
-            DirectoryInfo SelectDirectory = new(FolderPath);
-            SearchFile = Directory.GetFiles(SelectDirectory.ToString());
+            DirectoryInfo SelectDirectory;
+            try
+            {
+                SelectDirectory = new(FolderPath);
+                SearchFile = Directory.GetFiles(SelectDirectory.ToString());
+            }
+            catch
+            {
+                MessageBox.Show("현재 이 폴더에 액세스할 권한이 없습니다.", "액세스 거부");
+                return;
+            }
             for (int i = 0; i < SearchFile.Length; i++)
             {
                 FileInfo files = new(SearchFile[i]);
@@ -270,6 +271,8 @@ namespace FileRenamer
                 if (!files.Attributes.HasFlag(FileAttributes.Hidden)) FileList[FileListCount++] = SearchFile[i];
             }
             Console.WriteLine("Files : {0}", FileList.Length);
+
+            // 파일 리스트 초기화 및 불러오기
             FileItemInfo.Clear();
             double ProgressPercentage;
             for (int i = 0; i < FileList.Length; i++)
@@ -351,15 +354,24 @@ namespace FileRenamer
                         {
                             if (component.Split(':').First() == RegularType.Append.ToString())
                             {
-                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
-                                Params = Tokens.Split(','); // 매개변수 간 분류
-                                string AppendStr = Params[0].Trim().Trim('"'); // 추가할 문자열
-                                int AppendIndex = int.Parse(Params[1].Trim()); // 추가할 위치
-                                bool Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
-
+                                string AppendStr; int AppendIndex; bool Sequence;
+                                try // 표현식 에러 처리
+                                {
+                                    Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                    Params = Tokens.Split(','); // 매개변수 간 분류
+                                    AppendStr = Params[0].Trim().Trim('"'); // 추가할 문자열
+                                    AppendIndex = int.Parse(Params[1].Trim()); // 추가할 위치
+                                    Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("이름 변경 표현식이 잘못되었습니다.", "구문 오류!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    e.Cancel = true;
+                                    return;
+                                }
                                 if (AppendIndex > FileNameNoExt.Length || AppendIndex < 0) // 인덱스 에러 예외처리
                                 {
-                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK);
+                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     e.Cancel = true; return;
                                 }
                                 if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
@@ -376,15 +388,24 @@ namespace FileRenamer
                             }
                             if (component.Split(':').First() == RegularType.Delete.ToString())
                             {
-                                Tokens = component.Split(':').Last();// 정규식 유형, 매개변수 분류
-                                Params = Tokens.Split(','); // 매개변수 간 분류
-                                int DeleteRange = int.Parse(Params[0].Trim()); // 삭제할 범위
-                                int DeleteIndex = int.Parse(Params[1].Trim()); // 삭제할 위치
-                                bool Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
-
+                                int DeleteRange; int DeleteIndex; bool Sequence;
+                                try // 표현식 에러 처리
+                                {
+                                    Tokens = component.Split(':').Last();// 정규식 유형, 매개변수 분류
+                                    Params = Tokens.Split(','); // 매개변수 간 분류
+                                    DeleteRange = int.Parse(Params[0].Trim()); // 삭제할 범위
+                                    DeleteIndex = int.Parse(Params[1].Trim()); // 삭제할 위치
+                                    Sequence = bool.Parse(Params[2].Trim()); // 인덱싱 순서
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("이름 변경 표현식이 잘못되었습니다.", "구문 오류!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    e.Cancel = true;
+                                    return;
+                                }
                                 if (DeleteIndex + DeleteRange > FileNameNoExt.Length || DeleteIndex < 0) // 인덱스 에러 예외처리
                                 {
-                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK);
+                                    MessageBox.Show(string.Format($"다음 파일명에 대한 인덱스값이 잘못되었습니다.\n{FileFullName}"), "변경 중단!", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     e.Cancel = true; return;
                                 }
                                 if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
@@ -400,14 +421,23 @@ namespace FileRenamer
                             }
                             if (component.Split(':').First() == RegularType.Replace.ToString())
                             {
-                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
-                                Params = Tokens.Split(','); // 매개변수 간 분류
-                                string SearchStr = Params[0].Trim().Trim('"'); // 찾을 문자열
-                                string ReplaceStr = Params[1].Trim().Trim('"'); // 대체할 문자열
-
+                                string SearchStr; string ReplaceStr;
+                                try // 표현식 에러 처리
+                                {
+                                    Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                    Params = Tokens.Split(','); // 매개변수 간 분류
+                                    SearchStr = Params[0].Trim().Trim('"'); // 찾을 문자열
+                                    ReplaceStr = Params[1].Trim().Trim('"'); // 대체할 문자열
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("이름 변경 표현식이 잘못되었습니다.", "구문 오류!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    e.Cancel = true;
+                                    return;
+                                }
                                 if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // 확장자 미포함, '.'포함
                                 {
-                                    if(FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr) + FileExt;
+                                    if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr) + FileExt;
                                 }
                                 else // (확장자 포함, '.'포함), (확장자 포함, '.'미포함) = (확장자 미포함, '.'미포함)
                                 {
@@ -417,15 +447,35 @@ namespace FileRenamer
                             if (component.Split(':').First() == RegularType.NewNameSet.ToString())
                             {
                                 // 매개변수 간 분류 없음
-                                string NewStr = component.Split(':').Last().Trim().Trim('"'); // 새로운 문자열
+                                string NewStr;
+                                try // 표현식 에러 처리
+                                {
+                                    NewStr = component.Split(':').Last().Trim().Trim('"'); // 새로운 문자열
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("이름 변경 표현식이 잘못되었습니다.", "구문 오류!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    e.Cancel = true;
+                                    return;
+                                }
                                 ResultName += NewStr;
                             }
-                            if(component.Split(':').First() == RegularType.AutoIncrement.ToString())
+                            if (component.Split(':').First() == RegularType.AutoIncrement.ToString())
                             {
-                                Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
-                                Params = Tokens.Split(','); // 매개변수 간 분류
-                                int StartNumber = int.Parse(Params[0].Trim());
-                                int Increment = int.Parse(Params[1].Trim());
+                                int StartNumber; int Increment;
+                                try // 표현식 에러 처리
+                                {
+                                    Tokens = component.Split(':').Last(); // 정규식 유형, 매개변수 분류
+                                    Params = Tokens.Split(','); // 매개변수 간 분류
+                                    StartNumber = int.Parse(Params[0].Trim());
+                                    Increment = int.Parse(Params[1].Trim());
+                                }
+                                catch
+                                {
+                                    MessageBox.Show("이름 변경 표현식이 잘못되었습니다.", "구문 오류!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    e.Cancel = true;
+                                    return;
+                                }
                                 int CurrentNumber = StartNumber + Increment * Repetition++;
                                 ResultName += CurrentNumber.ToString();
                                 Console.WriteLine($"StartNumber:{StartNumber}, Increment;{Increment}, Repetition:{Repetition}");
@@ -449,7 +499,7 @@ namespace FileRenamer
                         }
                         else
                         {
-                            MessageBox.Show("아무것도 변경되지 않았습니다.", "변경 취소!", MessageBoxButtons.OK);
+                            MessageBox.Show("아무것도 변경되지 않았습니다.", "변경 취소!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                             e.Cancel = true; return;
                         }
                         Console.WriteLine($"From:{SourceName}, To:{ResultName}");
@@ -614,6 +664,39 @@ namespace FileRenamer
                 if (ErrorState) MessageBox.Show(ErrorMessage, "파일 없음");
             }
         }
+
+        /* 드래그 & 드롭 */
+        private void FileListView_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data == null) return;
+            string[] folder = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (folder.Length == 1)
+            {
+                foreach (string file in folder)
+                {
+                    // 파일의 속성을 가져와 디렉토리 여부를 검사
+                    FileAttributes attributes = File.GetAttributes(file);
+                    if ((attributes & FileAttributes.Directory) != FileAttributes.Directory)
+                    {
+                        // 디렉토리인 경우, Drag & Drop 허용하지 않음
+                        e.Effect = DragDropEffects.None;
+                        return;
+                    }
+                }
+                // 파일만 있는 경우, Drag & Drop 허용
+                e.Effect = DragDropEffects.Copy;
+            }
+            else e.Effect = DragDropEffects.None;
+        }
+        private void FileListView_DragDrop(object sender, DragEventArgs e)
+        {
+            if (e.Data == null) return;
+            string[] folder = (string[])e.Data.GetData(DataFormats.FileDrop);
+            Console.WriteLine("folder : {0}", folder[0]);
+            OpenFolder(folder[0]);
+        }
+
+        /* 우클릭 메뉴 */
         private void New_File_Event(object? sender, EventArgs e) { New_File(); } // 새 파일(&N)Strip 
         private void New_File() // 새 파일 
         {
@@ -870,10 +953,70 @@ namespace FileRenamer
         }
         #endregion
 
+        #region DateChange Event
+        private void DateChangeButton_Click(object sender, EventArgs e)
+        {
+            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("선택한 파일이 없습니다.", "대상 없음", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
+            if (FolderPath == null) return;
+            int hour = int.Parse(TimeSetMasked.Text[..2]);
+            int minute = int.Parse(TimeSetMasked.Text.Substring(3, 2));
+            foreach (ListViewItem item in FileListView.CheckedItems)
+            {
+                FileInfo file;
+                if (FolderPath.Length == 3) file = new(FolderPath + item.SubItems[1].Text);
+                else file = new(FolderPath + '\\' + item.SubItems[1].Text);
+                file.CreationTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+            }
+            MessageBox.Show("날짜 및 시간이 변경되었습니다.", "변경 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            Refresh_FileList();
+        }
+        private void TimeSetMasked_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            int startIndex = TimeSetMasked.SelectionStart;
+            if (char.IsDigit(e.KeyChar) && startIndex < TimeSetMasked.Text.Length - 1)
+            {
+                if (TimeSetMasked.SelectionStart == 2)
+                {
+                    TimeSetMasked.Text = TimeSetMasked.Text.Remove(startIndex + 1, 1);
+                    TimeSetMasked.Text = TimeSetMasked.Text.Insert(startIndex + 1, e.KeyChar.ToString());
+                    TimeSetMasked.SelectionStart = startIndex + 2;
+                }
+                else
+                {
+                    TimeSetMasked.Text = TimeSetMasked.Text.Remove(startIndex, 1);
+                    TimeSetMasked.SelectionStart = startIndex;
+                }
+            }
+        }
+        private void TimeSetMasked_Validating(object sender, CancelEventArgs e)
+        {
+            int hour, minute;
+            try
+            {
+                hour = int.Parse(TimeSetMasked.Text[..2]);
+                minute = int.Parse(TimeSetMasked.Text.Substring(3, 2));
+            }
+            catch
+            {
+                MessageBox.Show("올바른 시간 형식이 아닙니다.", "시간값 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true;
+                return;
+            }
+            if (hour < 0 || hour > 23 || minute < 0 || minute > 59)
+            {
+                MessageBox.Show("올바른 시간 형식이 아닙니다.", "시간값 오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true; // 입력값을 취소하여 이전 값으로 되돌리기
+                return;
+            }
+        }
+        #endregion
+
         #region Rename Event
         private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 폼 열기 
         {
-            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("선택한 파일이 없습니다.", "대상 없음", MessageBoxButtons.OK); FileListView.Select(); return; }
+            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("선택한 파일이 없습니다.", "대상 없음", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
             Rename rename = new();
             rename.StartPosition = FormStartPosition.CenterParent;
             rename.ExcuteRename += Rename_Renamed;
@@ -908,18 +1051,40 @@ namespace FileRenamer
         }
         private void SearchWords_KeyPress(object sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter) e.Handled = true; } // Enter 소리 무음 처리 
         private void OpenFolderButton_Click(object sender, EventArgs e) { OpenFolder(); } // 폴더 열기Click 
-        private void OpenFolder() // 폴더 열기 
+        private void OpenFolder(string NewFolderPath = "") // 폴더 열기 
         {
-            FileListView.Select();
-            FolderBrowserDialog OpenFolder = new();
-            DialogResult = OpenFolder.ShowDialog();
-            if (DialogResult == DialogResult.OK)
+            if (NewFolderPath == string.Empty)
             {
-                FolderPath = OpenFolder.SelectedPath;
+                FileListView.Select();
+                FolderBrowserDialog OpenFolder = new();
+                DialogResult = OpenFolder.ShowDialog();
+                if (DialogResult == DialogResult.OK)
+                {
+                    FolderPath = OpenFolder.SelectedPath;
+                    if (!FileLoadWorker.IsBusy)
+                    {
+                        IsEmptyWorkSpaceLabel.Hide();
+                        WorkPathLabel.Text = OpenFolder.SelectedPath;
+                        FileListView.Items.Clear();
+                        FileLoadWorker.RunWorkerAsync(FolderPath);
+                    }
+                    else
+                    {
+                        FileLoadWorker.CancelAsync();
+                        FileListView.Items.Clear();
+                        FileItemInfo.Clear();
+                        this.OpenFolder();
+                    }
+                }
+                StatusLabel2.Text = string.Empty;
+            }
+            else
+            {
+                FolderPath = NewFolderPath;
                 if (!FileLoadWorker.IsBusy)
                 {
                     IsEmptyWorkSpaceLabel.Hide();
-                    WorkPathLabel.Text = OpenFolder.SelectedPath;
+                    WorkPathLabel.Text = NewFolderPath;
                     FileListView.Items.Clear();
                     FileLoadWorker.RunWorkerAsync(FolderPath);
                 }
@@ -928,10 +1093,9 @@ namespace FileRenamer
                     FileLoadWorker.CancelAsync();
                     FileListView.Items.Clear();
                     FileItemInfo.Clear();
-                    this.OpenFolder();
+                    this.OpenFolder(FolderPath);
                 }
             }
-            StatusLabel2.Text = string.Empty;
         }
         private void OpenExplorer_Click(object sender, EventArgs e) // 탐색기로 열기 
         {
@@ -966,10 +1130,5 @@ namespace FileRenamer
             }
         }
         #endregion
-
-        private void FileListView_DragDrop(object sender, DragEventArgs e)
-        {
-            Console.WriteLine("Drag");
-        }
     }
 }

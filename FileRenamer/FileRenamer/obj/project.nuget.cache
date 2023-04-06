@@ -6,12 +6,5 @@
   "expectedPackageFiles": [
     "C:\\Users\\dlfdl\\.nuget\\packages\\materialskin.2\\2.3.1\\materialskin.2.2.3.1.nupkg.sha512"
   ],
-  "logs": [
-    {
-      "code": "Undefined",
-      "level": "Warning",
-      "warningLevel": 1,
-      "message": "캐시 파일 E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer\\obj\\project.nuget.cache을(를) 읽는 동안 문제가 발생했습니다. Invalid property identifier character: <. Path 'version', line 3, position 0."
-    }
-  ]
+  "logs": []
 }

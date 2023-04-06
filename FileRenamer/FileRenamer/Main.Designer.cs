@@ -150,6 +150,7 @@
             FileListView.View = View.Details;
             FileListView.ColumnClick += FileListView_ColumnClick;
             FileListView.DragDrop += FileListView_DragDrop;
+            FileListView.DragEnter += FileListView_DragEnter;
             FileListView.KeyDown += FileListView_KeyDown;
             FileListView.MouseDown += FileListView_MouseDown;
             // 
@@ -278,6 +279,7 @@
             DateChangeButton.TabIndex = 11;
             DateChangeButton.Text = "선택한 파일 시간 일괄 변경";
             DateChangeButton.UseVisualStyleBackColor = true;
+            DateChangeButton.Click += DateChangeButton_Click;
             // 
             // DatePicker
             // 
@@ -286,7 +288,7 @@
             DatePicker.Name = "DatePicker";
             DatePicker.Size = new Size(180, 23);
             DatePicker.TabIndex = 12;
-            DatePicker.Value = new DateTime(2023, 2, 22, 20, 18, 5, 0);
+            DatePicker.Value = new DateTime(2023, 2, 22, 20, 20, 0, 0);
             // 
             // LabelSetDate
             // 
@@ -329,11 +331,13 @@
             // TimeSetMasked
             // 
             TimeSetMasked.Location = new Point(678, 250);
-            TimeSetMasked.Mask = "90시90분";
+            TimeSetMasked.Mask = "90시00분";
             TimeSetMasked.Name = "TimeSetMasked";
             TimeSetMasked.Size = new Size(60, 23);
             TimeSetMasked.TabIndex = 17;
             TimeSetMasked.ValidatingType = typeof(DateTime);
+            TimeSetMasked.KeyPress += TimeSetMasked_KeyPress;
+            TimeSetMasked.Validating += TimeSetMasked_Validating;
             // 
             // ContainExtensionSwitch
             // 

@@ -29,7 +29,7 @@ namespace FileRenamer
         {
             if (sort == "asc")
             {
-                if (col == 5)
+                if (col == 5) // 파일 크기 col = 5
                 {
                     string sx, sy;
                     sx = ((ListViewItem)x).SubItems[col].Text.Replace(",", "");
@@ -43,7 +43,7 @@ namespace FileRenamer
             }
             else
             {
-                if (col == 5)
+                if (col == 5) // 파일 크기 col = 5
                 {
                     string sx, sy;
                     sx = ((ListViewItem)x).SubItems[col].Text.Replace(",", "");
