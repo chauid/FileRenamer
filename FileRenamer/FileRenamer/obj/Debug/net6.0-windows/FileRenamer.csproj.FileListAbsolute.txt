@@ -86,3 +86,4 @@ C:\Users\USER\Desktop\git\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-w
 C:\Users\USER\Desktop\git\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.pdb
 C:\Users\USER\Desktop\git\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.genruntimeconfig.cache
 C:\Users\USER\Desktop\git\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\ref\FileRenamer.dll
+E:\WorkSpace\GitHub\FileRenamer\FileRenamer\FileRenamer\obj\Debug\net6.0-windows\FileRenamer.ChangeDateTime.resources

@@ -82,6 +82,7 @@ namespace FileRenamer
                     if (AppendAfterRadioButton.Checked && AppendTextBox.Text != string.Empty) PatternTextBox.Text = string.Format("{{Append:\"{0}\", 0, {1}}}", AppendTextBox.Text, false);
                     if (AppendTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
                 };
+                AppendTextBox.Leave += Leave_RenameTextBox;
                 AppendTextBox.KeyPress += KeyPress_RenameTextBox;
                 PatternTextBox.Text = string.Empty;
                 DetailOptionPanel.Controls.Add(AppendBeforeRadioButton);
@@ -282,7 +283,7 @@ namespace FileRenamer
                             else PatternTextBox.Text = string.Format("{{NewNameSet:\"{0}\"}}{{AutoIncrement:1, 1}}", NewNameTextBox.Text);
                         }
                     }
-                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = "{FileName}";
+                    if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
                 };
                 ExtensionTextBox.TextChanged += delegate (object? sender, EventArgs e)
                 {
@@ -301,7 +302,10 @@ namespace FileRenamer
                     }
                     if (NewNameTextBox.Text == string.Empty) PatternTextBox.Text = string.Empty;
                 };
+                NewNameTextBox.Leave += Leave_RenameTextBox;
                 NewNameTextBox.KeyPress += KeyPress_RenameTextBox;
+                ExtensionTextBox.Leave += Leave_RenameTextBox;
+                ExtensionTextBox.KeyPress += KeyPress_RenameTextBox;
                 PatternTextBox.Text = string.Empty;
                 DetailOptionPanel.Controls.Add(AutoIncrement);
                 DetailOptionPanel.Controls.Add(StartNumberLabel);
@@ -354,6 +358,17 @@ namespace FileRenamer
                 e.KeyChar = Convert.ToChar(0);
             }
         }
+        private void Leave_RenameTextBox(object? sender, EventArgs e)
+        {
+            if(sender is TextBox RenameBox)
+            {
+                if (string.IsNullOrWhiteSpace(RenameBox.Text)) { RenameBox.Text = string.Empty; return; } // 모두 공백이거나 빈 문자열
+                while (RenameBox.Text.Last() == '.') RenameBox.Text = RenameBox.Text.Remove(RenameBox.Text.Length - 1); // 마지막 '.' 삭제
+                while (RenameBox.Text.First() == ' ') RenameBox.Text = RenameBox.Text.Remove(0, 1); // 처음 ' ' 삭제
+                while (RenameBox.Text.Last() == ' ') RenameBox.Text = RenameBox.Text.Remove(RenameBox.Text.Length - 1); // 마직막 ' ' 삭제
+            }
+        }
+
         private void PatternTextBox_TextChanged(object sender, EventArgs e)
         {
             if (PatternTextBox.Text.Length > 15)
@@ -364,6 +379,11 @@ namespace FileRenamer
                 // 유효성 금지 문자 무차별 대입시 "의 처음과 끝을 구분하여 "내부 문자열"을 추출하여 정규식 유효성 검사 실행해야 함
                 // 처음 "와 끝 "의 구분해야 함
             }
+        }
+
+        private void PreviewButton_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

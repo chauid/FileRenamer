@@ -3,8 +3,7 @@ using MaterialSkin;
 using System.ComponentModel;
 using System.Diagnostics;
 
-// TODO LIST v0.9
-// 아무것도 변경 안 되면 새로고침 안 하기 -> BackgroundWorker Complete 변수 추가
+// TODO LIST v0.9-alpha
 // 정규식 오타 예외 처리
 // 정규식 유형 자동 완성
 // 복수선택 이름 변경시 확장자 포함 변경 선택 기능 추가
@@ -45,7 +44,7 @@ namespace FileRenamer
     }
     public partial class Main : Form
     {
-        public const string Version = "0.9";
+        public const string Version = "0.9-alpha";
 
         /// <summary>
         /// ListView 우클릭 메뉴 
@@ -75,7 +74,12 @@ namespace FileRenamer
         /// <summary>
         /// 새 폴더 이름 
         /// </summary>
-        private string NewFileName = "직박구리";
+        private string DefaultFileName = "직박구리";
+
+        /// <summary>
+        /// 만든 날짜, 수정한 날짜, 액세스 날짜 일괄 변경 선택
+        /// </summary>
+        private bool IsDateTimeAllChange;
 
         /// <summary>
         /// 이름 바꾸기 상태  
@@ -532,7 +536,7 @@ namespace FileRenamer
         private void Worker_FileRenameCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
             ProgressCounter = 0;
-            Refresh_FileList();
+            if (!e.Cancelled) Refresh_FileList();
         }
         #endregion
 
@@ -702,7 +706,7 @@ namespace FileRenamer
         {
             if (FolderPath != null)
             {
-                string NewFileFull = FolderPath + '\\' + NewFileName;
+                string NewFileFull = FolderPath + '\\' + DefaultFileName;
                 int FileNumber = 1;
                 if (File.Exists(NewFileFull)) FileNumber++;
                 while (File.Exists(NewFileFull + '(' + FileNumber.ToString() + ')')) FileNumber++;
@@ -806,7 +810,7 @@ namespace FileRenamer
             if (sender is TextBox RenamerBox)
             {
                 if (TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("맑은 고딕", 9F)).Width <= 200) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("맑은 고딕", 9F));
-                else RenamerBox.Size = new Size(200, RenamerBox.Height);
+                else RenamerBox.Size = new Size(200, RenamerBox.Height); // 최소 크기 200
             }
         }
         private void RenamerBox_Leave(object? sender, EventArgs e)
@@ -815,6 +819,7 @@ namespace FileRenamer
             {
                 if (sender is TextBox RenamerBox)
                 {
+                    if (string.IsNullOrWhiteSpace(RenamerBox.Text)) { FileListView.Controls.RemoveAt(0); return; } // 모두 공백이거나 빈 문자열
                     while (RenamerBox.Text.Last() == '.') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // 마지막 '.' 삭제
                     while (RenamerBox.Text.First() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(0, 1); // 처음 ' ' 삭제
                     while (RenamerBox.Text.Last() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // 마직막 ' ' 삭제
@@ -960,17 +965,45 @@ namespace FileRenamer
             if (FolderPath == null) return;
             int hour = int.Parse(TimeSetMasked.Text[..2]);
             int minute = int.Parse(TimeSetMasked.Text.Substring(3, 2));
-            foreach (ListViewItem item in FileListView.CheckedItems)
+            if (IsDateTimeAllChange)
             {
-                FileInfo file;
-                if (FolderPath.Length == 3) file = new(FolderPath + item.SubItems[1].Text);
-                else file = new(FolderPath + '\\' + item.SubItems[1].Text);
-                file.CreationTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
-                file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
-                file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                foreach (ListViewItem item in FileListView.CheckedItems)
+                {
+                    FileInfo file;
+                    if (FolderPath.Length == 3) file = new(FolderPath + item.SubItems[1].Text);
+                    else file = new(FolderPath + '\\' + item.SubItems[1].Text);
+                    file.CreationTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                    file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                    file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
+                }
+                MessageBox.Show("날짜 및 시간이 변경되었습니다.", "변경 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                Refresh_FileList();
             }
-            MessageBox.Show("날짜 및 시간이 변경되었습니다.", "변경 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            Refresh_FileList();
+            else
+            {
+                ChangeDateTime ChangeDateTimeForm = new();
+                ChangeDateTimeForm.StartPosition = FormStartPosition.CenterParent;
+                ChangeDateTimeForm.ApplyDateTime += delegate (bool make, bool modify, bool access)
+                {
+                    bool changeAnything = false;
+                    foreach (ListViewItem item in FileListView.CheckedItems)
+                    {
+                        FileInfo file;
+                        if (FolderPath.Length == 3) file = new(FolderPath + item.SubItems[1].Text);
+                        else file = new(FolderPath + '\\' + item.SubItems[1].Text);
+                        if (make) { file.CreationTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0); changeAnything = true; }
+                        if (modify) { file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0); changeAnything = true; }
+                        if (access) { file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0); changeAnything = true; }
+                    }
+                    if (!changeAnything) MessageBox.Show("아무것도 변경되지 않았습니다.", "변경 사항 없음!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    else
+                    {
+                        MessageBox.Show("날짜 및 시간이 변경되었습니다.", "변경 완료", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Refresh_FileList();
+                    }
+                };
+                ChangeDateTimeForm.ShowDialog();
+            }
         }
         private void TimeSetMasked_KeyPress(object sender, KeyPressEventArgs e)
         {
@@ -1042,14 +1075,46 @@ namespace FileRenamer
             FileListView.Select();
             Setting SettingForm = new();
             SettingForm.StartPosition = FormStartPosition.CenterParent;
+            SettingForm.DefaultFileName = DefaultFileName;
+            SettingForm.IsDateTimeAllChange = IsDateTimeAllChange;
+            SettingForm.ApplySetting += delegate (string? Filename, bool Isdatetime)
+            {
+                if (Filename != null) DefaultFileName = Filename;
+                IsDateTimeAllChange = Isdatetime;
+            };
             SettingForm.ShowDialog();
         }
-
+        private void SearchWords_TextChanged(object sender, EventArgs e) // 검색어 입력 
+        {
+            if (FileLoadWorker.IsBusy) return;
+            int SearchItemCount = 0;
+            if (FileItemInfo != null)
+            {
+                FileListView.Items.Clear();
+                foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) SearchItemCount++;
+                if (SearchItemCount > 0)
+                {
+                    ListViewItem[] ResultItems = new ListViewItem[SearchItemCount];
+                    int resultindex = 0;
+                    foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) ResultItems[resultindex++] = items;
+                    FileListView.Items.AddRange(ResultItems);
+                    StatusLabel1.Text = string.Format("{0}개 항목", SearchItemCount);
+                    IsEmptyWorkSpaceLabel.Hide();
+                }
+                else
+                {
+                    StatusLabel1.Text = "0개 항목";
+                    IsEmptyWorkSpaceLabel.Text = "일치하는 항목이 없습니다.";
+                    IsEmptyWorkSpaceLabel.Show();
+                }
+                MainUILayout(0);
+            }
+        }
         private void SearchWords_KeyDown(object sender, KeyEventArgs e) // 검색어 감지 
         {
             if (e.KeyCode == Keys.Enter) FileListView.Focus();
         }
-        private void SearchWords_KeyPress(object sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter) e.Handled = true; } // Enter 소리 무음 처리 
+        private void SearchWords_KeyPress(object sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true; } // Enter 소리 무음 처리 
         private void OpenFolderButton_Click(object sender, EventArgs e) { OpenFolder(); } // 폴더 열기Click 
         private void OpenFolder(string NewFolderPath = "") // 폴더 열기 
         {
@@ -1103,31 +1168,12 @@ namespace FileRenamer
             if (FolderPath != null) Process.Start("explorer.exe", FolderPath);
             else StatusLabel1.Text = "현재 설정된 작업 경로 없습니다.";
         }
-        private void SearchWords_TextChanged(object sender, EventArgs e) // 검색어 입력 
+        #endregion
+
+        #region ToolStripMenu
+        private void UpdateCheckToolStrip_Click(object sender, EventArgs e)
         {
-            if (FileLoadWorker.IsBusy) return;
-            int SearchItemSize = 0;
-            if (FileItemInfo != null)
-            {
-                FileListView.Items.Clear();
-                foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) SearchItemSize++;
-                if (SearchItemSize > 0)
-                {
-                    ListViewItem[] ResultItems = new ListViewItem[SearchItemSize];
-                    int resultindex = 0;
-                    foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) ResultItems[resultindex++] = items;
-                    FileListView.Items.AddRange(ResultItems);
-                    StatusLabel1.Text = string.Format("{0}개 항목", SearchItemSize);
-                    IsEmptyWorkSpaceLabel.Hide();
-                }
-                else
-                {
-                    StatusLabel1.Text = "0개 항목";
-                    IsEmptyWorkSpaceLabel.Text = "일치하는 항목이 없습니다.";
-                    IsEmptyWorkSpaceLabel.Show();
-                }
-                MainUILayout(0);
-            }
+            MessageBox.Show(string.Format($"현재 버전 : {Version}"), "업데이트 확인");
         }
         #endregion
     }

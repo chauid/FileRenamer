@@ -199,6 +199,7 @@
             PreviewButton.TabIndex = 8;
             PreviewButton.Text = "미리보기";
             PreviewButton.UseVisualStyleBackColor = false;
+            PreviewButton.Click += PreviewButton_Click;
             // 
             // Rename
             // 

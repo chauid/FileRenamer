@@ -54,7 +54,6 @@
             MenuStrip = new MenuStrip();
             FileStripMenu = new ToolStripMenuItem();
             UpdateCheckToolStrip = new ToolStripMenuItem();
-            SettingStripMenu = new ToolStripMenuItem();
             TimeSetMasked = new MaskedTextBox();
             ContainExtensionSwitch = new MaterialSkin.Controls.MaterialSwitch();
             WorkSpacePanel.SuspendLayout();
@@ -302,7 +301,7 @@
             // MenuStrip
             // 
             MenuStrip.BackColor = SystemColors.Control;
-            MenuStrip.Items.AddRange(new ToolStripItem[] { FileStripMenu, SettingStripMenu });
+            MenuStrip.Items.AddRange(new ToolStripItem[] { FileStripMenu });
             MenuStrip.Location = new Point(0, 0);
             MenuStrip.Name = "MenuStrip";
             MenuStrip.Size = new Size(780, 24);
@@ -319,14 +318,9 @@
             // UpdateCheckToolStrip
             // 
             UpdateCheckToolStrip.Name = "UpdateCheckToolStrip";
-            UpdateCheckToolStrip.Size = new Size(150, 22);
+            UpdateCheckToolStrip.Size = new Size(180, 22);
             UpdateCheckToolStrip.Text = "업데이트 확인";
-            // 
-            // SettingStripMenu
-            // 
-            SettingStripMenu.Name = "SettingStripMenu";
-            SettingStripMenu.Size = new Size(43, 20);
-            SettingStripMenu.Text = "설정";
+            UpdateCheckToolStrip.Click += UpdateCheckToolStrip_Click;
             // 
             // TimeSetMasked
             // 
@@ -418,6 +412,5 @@
         private ToolStripMenuItem FileStripMenu;
         private MaskedTextBox TimeSetMasked;
         private ToolStripMenuItem UpdateCheckToolStrip;
-        private ToolStripMenuItem SettingStripMenu;
     }
 }
