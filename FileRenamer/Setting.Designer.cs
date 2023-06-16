@@ -67,7 +67,7 @@
             InputFileNameTextBox.SelectionLength = 0;
             InputFileNameTextBox.SelectionStart = 0;
             InputFileNameTextBox.ShortcutsEnabled = true;
-            InputFileNameTextBox.Size = new Size(285, 48);
+            InputFileNameTextBox.Size = new Size(330, 48);
             InputFileNameTextBox.TabIndex = 1;
             InputFileNameTextBox.TabStop = false;
             InputFileNameTextBox.TextAlign = HorizontalAlignment.Left;
@@ -95,12 +95,12 @@
             // 
             // ApplyButton
             // 
-            ApplyButton.BackColor = Color.LightGreen;
+            ApplyButton.BackColor = Color.Cyan;
             ApplyButton.FlatAppearance.BorderSize = 0;
             ApplyButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
             ApplyButton.FlatAppearance.MouseOverBackColor = Color.LawnGreen;
             ApplyButton.FlatStyle = FlatStyle.Flat;
-            ApplyButton.Location = new Point(201, 208);
+            ApplyButton.Location = new Point(215, 210);
             ApplyButton.Name = "ApplyButton";
             ApplyButton.Size = new Size(85, 30);
             ApplyButton.TabIndex = 3;
@@ -110,12 +110,12 @@
             // 
             // CloseButton
             // 
-            CloseButton.BackColor = Color.Goldenrod;
+            CloseButton.BackColor = Color.LightGray;
             CloseButton.FlatAppearance.BorderSize = 0;
             CloseButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
             CloseButton.FlatAppearance.MouseOverBackColor = Color.Salmon;
             CloseButton.FlatStyle = FlatStyle.Flat;
-            CloseButton.Location = new Point(303, 208);
+            CloseButton.Location = new Point(305, 210);
             CloseButton.Name = "CloseButton";
             CloseButton.Size = new Size(85, 30);
             CloseButton.TabIndex = 4;

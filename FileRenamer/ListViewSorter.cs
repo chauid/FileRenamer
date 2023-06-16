@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
 
 namespace FileRenamer
 {
@@ -12,7 +7,7 @@ namespace FileRenamer
     /// </summary>
     internal class ListViewItemComparer : IComparer
     {
-        private int col;
+        private readonly int col;
         public string sort = "asc";
         public ListViewItemComparer()
         {
@@ -23,10 +18,9 @@ namespace FileRenamer
             col = column;
             this.sort = sort;
         }
-#pragma warning disable CS8767 // 매개 변수 형식에서 참조 형식의 null 허용 여부가 암시적으로 구현된 멤버와 일치하지 않음(null 허용 여부 특성 때문일 수 있음)
-        public int Compare(object x, object y)
-#pragma warning restore CS8767 // 매개 변수 형식에서 참조 형식의 null 허용 여부가 암시적으로 구현된 멤버와 일치하지 않음(null 허용 여부 특성 때문일 수 있음)
+        public int Compare(object? x, object? y)
         {
+            if (x == null || y == null) return 0;
             if (sort == "asc")
             {
                 if (col == 5) // 파일 크기 col = 5

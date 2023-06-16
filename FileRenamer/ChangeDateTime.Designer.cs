@@ -85,7 +85,7 @@
             // 
             // ApplyButton
             // 
-            ApplyButton.BackColor = Color.LightGreen;
+            ApplyButton.BackColor = Color.Cyan;
             ApplyButton.FlatAppearance.BorderSize = 0;
             ApplyButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
             ApplyButton.FlatAppearance.MouseOverBackColor = Color.LawnGreen;
@@ -100,7 +100,7 @@
             // 
             // CloseButton
             // 
-            CloseButton.BackColor = Color.Goldenrod;
+            CloseButton.BackColor = Color.LightGray;
             CloseButton.FlatAppearance.BorderSize = 0;
             CloseButton.FlatAppearance.MouseDownBackColor = Color.Thistle;
             CloseButton.FlatAppearance.MouseOverBackColor = Color.Salmon;

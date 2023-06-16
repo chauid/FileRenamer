@@ -4,14 +4,25 @@
     <Compile Update="ChangeDateTime.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="Main.Properties.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Rename.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Main.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Update="RenamePreview.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Setting.cs">
       <SubType>Form</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="ChangeDateTime.resx">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>

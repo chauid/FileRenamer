@@ -1,106 +1,19 @@
-using FindImage;
-using MaterialSkin;
+ï»¿using MaterialSkin;
 using System.ComponentModel;
 using System.Diagnostics;
 
 // TODO LIST v0.9-alpha
-// ÀÌ¸§ º¯°æ Ç¥Çö½Ä ¿ÀÅ¸ ¿¹¿Ü Ã³¸®
-// ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü ÀÚµ¿ ¿Ï¼º
-// º¹¼ö¼±ÅÃ ÀÌ¸§ º¯°æ½Ã È®ÀåÀÚ Æ÷ÇÔ º¯°æ ¼±ÅÃ ±â´É Ãß°¡
-// Ctrl + Z ±â´É Ãß°¡ 
+// ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ì˜¤íƒ€ ì˜ˆì™¸ ì²˜ë¦¬
+// ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜• ìë™ ì™„ì„±
+// ë³€ê²½ë  íŒŒì¼ ë¯¸ë¦¬ë³´ê¸°
+// ë³µìˆ˜ì„ íƒ ì´ë¦„ ë³€ê²½ì‹œ í™•ì¥ì í¬í•¨ ë³€ê²½ ì„ íƒ ê¸°ëŠ¥ ì¶”ê°€
+// Ctrl + Z ê¸°ëŠ¥ ì¶”ê°€ 
+
 
 namespace FileRenamer
 {
-    /// <summary>
-    /// <para>ÀÌ¸§ ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü : {Ãß°¡, »èÁ¦, ´ëÃ¼, »õÀÌ¸§ Á¤ÀÇ, ¼ıÀÚÁõºĞ}</para>
-    /// <para>ÀÌ¸§ º¯°æ Ç¥Çö½Ä ±¸ºĞÀÚ : "{}"</para>
-    /// </summary>
-    public enum RegularType
-    {
-        /// <summary>
-        /// ¹®ÀÚ¿­ Ãß°¡. ÀÌ¸§ º¯°æ Ç¥Çö½Ä È°¿ë:{Append:"Ãß°¡ÇÒ ¹®ÀÚ¿­", Ãß°¡ÇÒ À§Ä¡(int), ÀÎµ¦½Ì¼ø¼­(Boolean)}
-        /// </summary>
-        Append = 0,
-
-        /// <summary>
-        /// ¹®ÀÚ¿­ »èÁ¦. ÀÌ¸§ º¯°æ Ç¥Çö½Ä È°¿ë:{Delete:»èÁ¦ÇÒ ¹üÀ§(int), »èÁ¦ÇÒ À§Ä¡(int), ÀÎµ¦½Ì¼ø¼­(Boolean)}
-        /// </summary>
-        Delete = 1,
-
-        /// <summary>
-        /// ¹®ÀÚ¿­ ´ëÃ¼. ÀÌ¸§ º¯°æ Ç¥Çö½Ä È°¿ë:{Replace:"Ã£À» ¹®ÀÚ¿­", "´ëÃ¼ÇÒ ¹®ÀÚ¿­"}
-        /// </summary>
-        Replace = 2,
-
-        /// <summary>
-        /// »õ·Î¿î ¹®ÀÚ¿­ Ãß°¡. ÀÌ¸§ º¯°æ Ç¥Çö½Ä È°¿ë : {NewNameSet:"»õ·Î¿î ¹®ÀÚ¿­"}
-        /// </summary>
-        NewNameSet = 3,
-
-        /// <summary>
-        /// ¼ıÀÚ ÀÚµ¿ Áõ°¡. ÀÌ¸§ º¯°æ Ç¥Çö½Ä È°¿ë : {AutoIncrement:½ÃÀÛ°ª(int), ÁõºĞ°ª(int)}
-        /// </summary>
-        AutoIncrement = 4
-    }
     public partial class Main : Form
     {
-        public const string Version = "0.9-alpha";
-
-        /// <summary>
-        /// ListView ¿ìÅ¬¸¯ ¸Ş´º 
-        /// </summary>
-        private ContextMenuStrip? FileListMenu;
-
-        /// <summary>
-        /// Ç×¸ñº° ¾ÆÀÌÅÛ ¸®½ºÆ®{ÆÄÀÏ¸í, À¯Çü, ¸¸µç ³¯Â¥, ¼öÁ¤ÇÑ ³¯Â¥, Å©±â} 
-        /// </summary>
-        private List<ListViewItem> FileItemInfo = new();
-
-        /// <summary>
-        /// ÀÌ¸§ º¯°æ ´ë»ó Ç×¸ñ ¸®½ºÆ®(¼±ÅÃÇÑ Ç×¸ñ)
-        /// </summary>
-        private List<string> SelectedRenameList = new();
-
-        /// <summary>
-        /// ÇöÀç Æú´õ °æ·Î 
-        /// </summary>
-        private string? FolderPath;
-
-        /// <summary>
-        /// ºÒ·¯¿Â ÆÄÀÏ ÀÌ¸§ ¸®½ºÆ®(string) 
-        /// </summary>
-        private string[]? FileList;
-
-        /// <summary>
-        /// »õ Æú´õ ÀÌ¸§ 
-        /// </summary>
-        private string DefaultFileName = "Á÷¹Ú±¸¸®";
-
-        /// <summary>
-        /// ¸¸µç ³¯Â¥, ¼öÁ¤ÇÑ ³¯Â¥, ¾×¼¼½º ³¯Â¥ ÀÏ°ı º¯°æ ¼±ÅÃ
-        /// </summary>
-        private bool IsDateTimeAllChange;
-
-        /// <summary>
-        /// ÀÌ¸§ ¹Ù²Ù±â »óÅÂ  
-        /// </summary>
-        private bool RenameState;
-
-        /// <summary>
-        /// FileListView ¼±ÅÃ °³¼ö Update Timer
-        /// </summary>
-        private System.Windows.Forms.Timer? CheckedBoxTimer;
-
-        /// <summary>
-        /// FileListView ¼±ÅÃ °³¼ö
-        /// </summary>
-        private int CheckedBoxCount;
-
-        private BackgroundWorker FileLoadWorker;
-        private BackgroundWorker FileRenameWorker;
-        private int ProgressCounter;
-        private MaterialSkinManager materialSkinManager = MaterialSkinManager.Instance;
-
         #region Main 
         public Main()
         {
@@ -110,7 +23,6 @@ namespace FileRenamer
             materialSkinManager.ColorScheme = new ColorScheme(Primary.Blue500, Primary.BlueGrey800, Primary.BlueGrey800, Accent.DeepPurple700, TextShade.BLACK);
 
             // Load Background
-            FileLoadWorker = new();
             FileLoadWorker.WorkerReportsProgress = true;
             FileLoadWorker.WorkerSupportsCancellation = true;
             FileLoadWorker.DoWork += Worker_FileLoad;
@@ -118,7 +30,6 @@ namespace FileRenamer
             FileLoadWorker.RunWorkerCompleted += Worker_FileLoadCompleted;
 
             // Rename Background
-            FileRenameWorker = new();
             FileRenameWorker.WorkerReportsProgress = true;
             FileRenameWorker.WorkerSupportsCancellation = true;
             FileRenameWorker.DoWork += Worker_FileRename;
@@ -126,11 +37,40 @@ namespace FileRenamer
             FileRenameWorker.RunWorkerCompleted += Worker_FileRenameCompleted;
 
             // Timer
-            CheckedBoxTimer = new();
             CheckedBoxTimer.Interval = 34; // 30FPS 
             CheckedBoxTimer.Tick += CheckedBoxTimer_Tick;
             CheckedBoxTimer.Enabled = true;
             FileListView.Select();
+
+
+            // FileListMenuNoneSelect
+            FileListMenuNoneSelect.Items.Add("ìƒˆ íŒŒì¼(&N)", null, New_File_Event);
+            FileListMenuNoneSelect.Items.Add("ì „ì²´ ì„ íƒ(&A)", null, Select_All_Event);
+            FileListMenuNoneSelect.Items.Add("ìƒˆë¡œ ê³ ì¹¨(&E)", null, Refresh_FileList_Event);
+            FileListMenuNoneSelect.Items.Add(new ToolStripSeparator());
+            FileListMenuNoneSelect.Items.Add("ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S)", null, New_WorkSpace_Event);
+            FileListMenuNoneSelect.Items.Add("íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°", null, Open_Explorer_Event);
+
+            // FileListMenuSingleSelect
+            FileListMenuSingleSelect.Items.Add("ì—´ê¸°(&O)", null, Process_Start_Event);
+            FileListMenuSingleSelect.Items.Add("ì „ì²´ ì„ íƒ(&A)", null, Select_All_Event);
+            FileListMenuSingleSelect.Items.Add("ìƒˆë¡œ ê³ ì¹¨(&E)", null, Refresh_FileList_Event);
+            FileListMenuSingleSelect.Items.Add(new ToolStripSeparator());
+            FileListMenuSingleSelect.Items.Add("ì´ë¦„ ë°”ê¾¸ê¸°(&M)", null, Rename_File_Event);
+            FileListMenuSingleSelect.Items.Add("ì‚­ì œ(&D)", null, Delete_File_Event);
+            FileListMenuSingleSelect.Items.Add(new ToolStripSeparator());
+            FileListMenuSingleSelect.Items.Add("ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S)", null, New_WorkSpace_Event);
+            FileListMenuSingleSelect.Items.Add("íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°", null, Open_Explorer_Event);
+
+            // FileListMenuMultiSelect
+            FileListMenuMultiSelect.Items.Add("ì—´ê¸°(&O)", null, Process_Start_Event);
+            FileListMenuMultiSelect.Items.Add("ì „ì²´ ì„ íƒ(&A)", null, Select_All_Event);
+            FileListMenuMultiSelect.Items.Add("ìƒˆë¡œ ê³ ì¹¨(&E)", null, Refresh_FileList_Event);
+            FileListMenuMultiSelect.Items.Add(new ToolStripSeparator());
+            FileListMenuMultiSelect.Items.Add("ì‚­ì œ(&D)", null, Delete_File_Event);
+            FileListMenuMultiSelect.Items.Add(new ToolStripSeparator());
+            FileListMenuMultiSelect.Items.Add("ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S)", null, New_WorkSpace_Event);
+            FileListMenuMultiSelect.Items.Add("íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°", null, Open_Explorer_Event);
 
             // DatePicker
             DatePicker.Value = DateTime.Now;
@@ -138,56 +78,60 @@ namespace FileRenamer
             // DatePicker
             TimeSetMasked.Text = "0000";
 
-            // Á¾·á ÀÌº¥Æ® 
-            foreach (Control controls in this.Controls)
+            // ì¢…ë£Œ ì´ë²¤íŠ¸ 
+            foreach (Control controls in Controls)
             {
                 controls.KeyDown += KeyDown_Close;
             }
         }
-        private void Main_Load(object sender, EventArgs e) // ÃÊ±â È­¸é ¼³Á¤ 
+
+        private void Main_Load(object? sender, EventArgs e) // ì´ˆê¸° í™”ë©´ ì„¤ì • 
         {
-            ToolTip toolTip = new();
-            toolTip.AutoPopDelay = 3000;
-            toolTip.InitialDelay = 500;
-            toolTip.ReshowDelay = 500;
-            toolTip.ShowAlways = true;
+            ToolTip toolTip = new()
+            {
+                AutoPopDelay = 3000,
+                InitialDelay = 500,
+                ReshowDelay = 500,
+                ShowAlways = true
+            };
 
             /* FileListView */
-            FileListView.Columns[1].Text += '¡ä';
-            FileListView.ListViewItemSorter = new ListViewItemComparer(1, "asc"); // cols:1 = ÆÄÀÏ¸í 
+            FileListView.Columns[1].Text += 'â–½';
+            FileListView.ListViewItemSorter = new ListViewItemComparer(1, "asc"); // cols:1 = íŒŒì¼ëª… 
 
             /* OpenFolderButton */
             OpenFolderButton.Image = ImageFinder.GetIamgeFile("AddFolder.png", 25, 25);
-            toolTip.SetToolTip(OpenFolderButton, "ÀÛ¾÷ °æ·Î ¼³Á¤ÇÏ±â");
+            toolTip.SetToolTip(OpenFolderButton, "ì‘ì—… ê²½ë¡œ ì„¤ì •í•˜ê¸°");
 
             /* SettingButton */
             SettingButton.Image = ImageFinder.GetIamgeFile("Setting.png", 25, 25);
-            toolTip.SetToolTip(SettingButton, "¼³Á¤");
+            toolTip.SetToolTip(SettingButton, "ì„¤ì •");
 
             /* SearchWords */
             SearchWords.TrailingIcon = ImageFinder.GetIamgeFile("Search.png", 32, 32);
 
             /* OpenExplorer */
             OpenExplorer.Image = ImageFinder.GetIamgeFile("OpenFolder.png", 25, 25);
-            toolTip.SetToolTip(OpenExplorer, "ÆÄÀÏ Å½»ö±â·Î ¿­±â");
+            toolTip.SetToolTip(OpenExplorer, "íŒŒì¼ íƒìƒ‰ê¸°ë¡œ ì—´ê¸°");
 
             /* IsEmptyWorkSpaceLabel */
             if (WorkPathLabel.Text == string.Empty) IsEmptyWorkSpaceLabel.Show();
             else IsEmptyWorkSpaceLabel.Hide();
 
             /* ContainExtensionSwitch */
-            toolTip.SetToolTip(ContainExtensionSwitch, "ÀÌ¸§ º¯°æ ½Ã, ÆÄÀÏ¸í¿¡ È®ÀåÀÚ Æ÷ÇÔ¿¡ ´ëÇÑ ¿©ºÎÀÔ´Ï´Ù.");
+            toolTip.SetToolTip(ContainExtensionSwitch, "ì´ë¦„ ë³€ê²½ ì‹œ, íŒŒì¼ëª…ì— í™•ì¥ì í¬í•¨ì— ëŒ€í•œ ì—¬ë¶€ì…ë‹ˆë‹¤.");
         }
-        private void Main_Resize(object sender, EventArgs e) { MainUILayout(1); } // È­¸é Å©±â Á¶Àı 
 
-        private void CheckedBoxTimer_Tick(object? sender, EventArgs e) // ListView ¼±ÅÃ Tick 
+        private void Main_Resize(object? sender, EventArgs e) { MainUILayout(1); } // í™”ë©´ í¬ê¸° ì¡°ì ˆ 
+
+        private void CheckedBoxTimer_Tick(object? sender, EventArgs e) // ListView ì„ íƒ Tick 
         {
             if (CheckedBoxCount != FileListView.CheckedItems.Count)
             {
                 if (FileListView.CheckedItems.Count > 0)
                 {
                     StatusLabel2.Location = new Point(StatusLabel1.Location.X + StatusLabel1.Width, StatusLabel1.Location.Y);
-                    StatusLabel2.Text = string.Format("{0}°³ ¼±ÅÃÇÔ", FileListView.CheckedItems.Count);
+                    StatusLabel2.Text = string.Format("{0}ê°œ ì„ íƒí•¨", FileListView.CheckedItems.Count);
                     if (SelectedRenameList != null)
                     {
                         SelectedRenameList.Clear();
@@ -199,46 +143,15 @@ namespace FileRenamer
             }
         }
 
-        /// <summary>
-        /// ¸Ş´ºÈ­¸é UI ±×¸®±â 
-        /// </summary>
-        /// <param name="Selection">0:WorkSpaceUI¸¸ ±×¸®±â, 1:¸ğµÎ ´Ù½Ã ±×¸®±â</param>
-        private void MainUILayout(int Selection) // 0: WorkSpaceUI, 1: ¸ğµÎ Àç¼³Á¤ 
-        {
-            if (Selection > -1)
-            {
-                /* WorkSpace UI */
-                WorkSpacePanel.Size = new Size(ClientSize.Width - 220, ClientSize.Height - 25);
-                FileListView.Size = new Size(WorkSpacePanel.Width - 10, WorkSpacePanel.Height - 60);
-                IsEmptyWorkSpaceLabel.Location = new Point(FileListView.Width / 2 - IsEmptyWorkSpaceLabel.Width / 2 + 5, FileListView.Height / 2 - IsEmptyWorkSpaceLabel.Height / 2 + 20);
-                LoadProcessBar.Location = new Point(5, FileListView.Location.Y + FileListView.Height + 5);
-                LoadProcessBar.Size = new Size(FileListView.Width, 5);
-                StatusLabel1.Location = new Point(5, LoadProcessBar.Location.Y + 10);
-                StatusLabel2.Location = new Point(StatusLabel1.Location.X + StatusLabel1.Width + 5, LoadProcessBar.Location.Y + 10);
-            }
-            if (Selection > 0)
-            {
-                /* ¿ÜºÎ UI */
-                OpenFolderButton.Location = new Point(WorkSpacePanel.Width + 5, 40);
-                OpenExplorer.Location = new Point(OpenFolderButton.Location.X + OpenFolderButton.Width + 5, 40);
-                SearchWords.Location = new Point(WorkSpacePanel.Width + 5, 85);
-                SettingButton.Location = new Point(WorkSpacePanel.Width + 5, 140);
-                LabelSetDate.Location = new Point(WorkSpacePanel.Width + 5, 200);
-                DatePicker.Location = new Point(WorkSpacePanel.Width + 5, 220);
-                TimeSetMasked.Location = new Point(DatePicker.Location.X + DatePicker.Width - TimeSetMasked.Width, 250);
-                DateChangeButton.Location = new Point(WorkSpacePanel.Width + 5, 290);
-                ReNameButton.Location = new Point(WorkSpacePanel.Width + 5, 350);
-                ContainExtensionSwitch.Location = new Point(WorkSpacePanel.Width + 10, 410);
-            }
-        }
         private void KeyDown_Close(object? sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) { this.Close(); return; }
+            if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) { Close(); return; }
         }
-        private void Main_FormClosing(object sender, FormClosingEventArgs e) // Á¾·á -> BackgroundWorker Á¾·á 
+
+        private void Main_FormClosing(object? sender, FormClosingEventArgs e) // ì¢…ë£Œ -> BackgroundWorker ì¢…ë£Œ 
         {
             if (FileLoadWorker != null) if (FileLoadWorker.IsBusy) FileLoadWorker.CancelAsync();
-            if (MessageBox.Show("ÇÁ·Î±×·¥À» Á¾·áÇÏ½Ã°Ú½À´Ï±î?", "Á¾·á", MessageBoxButtons.OKCancel) == DialogResult.OK) e.Cancel = false;
+            if (MessageBox.Show("í”„ë¡œê·¸ë¨ì„ ì¢…ë£Œí•˜ì‹œê² ìŠµë‹ˆê¹Œ?", "ì¢…ë£Œ", MessageBoxButtons.OKCancel) == DialogResult.OK) e.Cancel = false;
             else e.Cancel = true;
         }
         #endregion
@@ -259,7 +172,7 @@ namespace FileRenamer
             }
             catch
             {
-                MessageBox.Show("ÇöÀç ÀÌ Æú´õ¿¡ ¾×¼¼½ºÇÒ ±ÇÇÑÀÌ ¾ø½À´Ï´Ù.", "¾×¼¼½º °ÅºÎ");
+                MessageBox.Show("í˜„ì¬ ì´ í´ë”ì— ì•¡ì„¸ìŠ¤í•  ê¶Œí•œì´ ì—†ìŠµë‹ˆë‹¤.", "ì•¡ì„¸ìŠ¤ ê±°ë¶€");
                 return;
             }
             for (int i = 0; i < SearchFile.Length; i++)
@@ -276,7 +189,7 @@ namespace FileRenamer
             }
             Console.WriteLine("Files : {0}", FileList.Length);
 
-            // ÆÄÀÏ ¸®½ºÆ® ÃÊ±âÈ­ ¹× ºÒ·¯¿À±â
+            // íŒŒì¼ ë¦¬ìŠ¤íŠ¸ ì´ˆê¸°í™” ë° ë¶ˆëŸ¬ì˜¤ê¸°
             FileItemInfo.Clear();
             double ProgressPercentage;
             for (int i = 0; i < FileList.Length; i++)
@@ -289,7 +202,7 @@ namespace FileRenamer
                     if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
                     else if (FileSize == 0) FileSize = 0;
                     else FileSize = 1;
-                    string[] ItemInfo = { "", FilesInfo.Name, FilesInfo.Extension, FilesInfo.CreationTime.ToString(), FilesInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
+                    string[] ItemInfo = ["", FilesInfo.Name, FilesInfo.Extension, FilesInfo.CreationTime.ToString(), FilesInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB")];
                     ListViewItem item = new(ItemInfo);
                     FileItemInfo.Add(item);
                     ProgressPercentage = ++ProgressCounter / (double)FileList.Length * 100;
@@ -297,245 +210,252 @@ namespace FileRenamer
                 }
             }
         }
+
         private void Worker_FileLoadProgress(object? sender, ProgressChangedEventArgs e)
         {
             LoadProcessBar.Value = e.ProgressPercentage;
-            StatusLabel1.Text = string.Format("ºÒ·¯¿À´Â Áß... {0}%", e.ProgressPercentage);
+            StatusLabel1.Text = string.Format("ë¶ˆëŸ¬ì˜¤ëŠ” ì¤‘... {0}%", e.ProgressPercentage);
         }
+
         private void Worker_FileLoadCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
-            if (FileList != null) StatusLabel1.Text = string.Format("{0}°³ Ç×¸ñ", FileList.Length);
-            if (FileItemInfo != null) FileListView.Items.AddRange(FileItemInfo.ToArray());
+            if (FileList != null) StatusLabel1.Text = string.Format("{0}ê°œ í•­ëª©", FileList.Length);
+            if (FileItemInfo != null) FileListView.Items.AddRange([.. FileItemInfo]);
             ProgressCounter = 0;
         }
+
         private void Worker_FileRename(object? sender, DoWorkEventArgs e) // File Rename
         {
-            if (e.Argument is string Regular)
-            {
-                //SelectedRenameList // ÀÌ¸§ º¯°æ ¸®½ºÆ®
-                // ÀÌ¸§ º¯°æ Ç¥Çö½Ä ºĞ·ù 
-                // {} ´ëºĞ·ù => ¿ä¼Ò ºĞ·ù 
-                // : ÁßºĞ·ù => ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü, ¸Å°³º¯¼ö ºĞ·ù
-                // , ¼ÒºĞ·ù => ¸Å°³º¯¼ö °£ ºĞ·ù
-                List<string> Components = new();
-                string Tokens = string.Empty;
-                string[] Params;
-                bool ReadState = false, SkipParen = false;
-                for (int i = 0; i < Regular.Length; i++)
-                {
-                    if (Regular[i] == '\"')
-                    {
-                        if (SkipParen) SkipParen = false;
-                        else SkipParen = true;
-                    }
-                    if (!SkipParen)
-                    {
-                        if (Regular[i] == '{') { ReadState = true; continue; }
-                        if (Regular[i] == '}')
-                        {
-                            Components.Add(Tokens);
-                            Tokens = string.Empty;
-                            ReadState = false;
-                            continue;
-                        }
-                    }
-                    if (ReadState) Tokens += Regular[i];
-                }
-                int Repetition = 0; // ¸ğµç Ç×¸ñ¿¡ ´ëÇÑ ¹İº¹ ¼ö
-                double ProgressPercentage = 0;
-                foreach (string FileFullName in SelectedRenameList) // ¼±ÅÃÇÑ ¸ğµç Ç×¸ñ¿¡ ´ëÇÏ¿©
-                {
-                    if (FileLoadWorker.CancellationPending == true) { e.Cancel = true; return; }
-                    if (FolderPath is string FilePath)
-                    {
-                        string FileNameNoExt = FileFullName, FileExt = string.Empty, ResultName = string.Empty;
-                        if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.' Æ÷ÇÔ
-                        {
-                            FileExt = '.' + FileFullName.Split('.').Last();
-                            FileNameNoExt = FileFullName.Remove(FileFullName.Length - FileExt.Length);
-                        }
-                        // (È®ÀåÀÚ Æ÷ÇÔ, '.'Æ÷ÇÔ), (È®ÀåÀÚ Æ÷ÇÔ, '.'¹ÌÆ÷ÇÔ) = (È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'¹ÌÆ÷ÇÔ)
-                        foreach (string component in Components) // ¿ä¼Ò ºĞ·ù
-                        {
-                            if (component.Split(':').First() == RegularType.Append.ToString())
-                            {
-                                string AppendStr; int AppendIndex; bool Sequence;
-                                try // Ç¥Çö½Ä ¿¡·¯ Ã³¸®
-                                {
-                                    Tokens = component.Split(':').Last(); // ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü, ¸Å°³º¯¼ö ºĞ·ù
-                                    Params = Tokens.Split(','); // ¸Å°³º¯¼ö °£ ºĞ·ù
-                                    AppendStr = Params[0].Trim().Trim('"'); // Ãß°¡ÇÒ ¹®ÀÚ¿­
-                                    AppendIndex = int.Parse(Params[1].Trim()); // Ãß°¡ÇÒ À§Ä¡
-                                    Sequence = bool.Parse(Params[2].Trim()); // ÀÎµ¦½Ì ¼ø¼­
-                                }
-                                catch
-                                {
-                                    MessageBox.Show("ÀÌ¸§ º¯°æ Ç¥Çö½ÄÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.", "±¸¹® ¿À·ù!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true;
-                                    return;
-                                }
-                                if (AppendIndex > FileNameNoExt.Length || AppendIndex < 0) // ÀÎµ¦½º ¿¡·¯ ¿¹¿ÜÃ³¸®
-                                {
-                                    MessageBox.Show(string.Format($"´ÙÀ½ ÆÄÀÏ¸í¿¡ ´ëÇÑ ÀÎµ¦½º°ªÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\n{FileFullName}"), "º¯°æ Áß´Ü!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true; return;
-                                }
-                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'Æ÷ÇÔ
-                                {
-                                    if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..] + FileExt;
-                                    else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..] + FileExt;
-                                }
-                                else // (È®ÀåÀÚ Æ÷ÇÔ, '.'Æ÷ÇÔ), (È®ÀåÀÚ Æ÷ÇÔ, '.'¹ÌÆ÷ÇÔ) = (È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'¹ÌÆ÷ÇÔ)
-                                {
-                                    if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..];
-                                    else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..];
-                                    // Ãà¾à¾î [..^AppendIndex] = Substring(0, targetFile.Length - AppendIndex)
-                                }
-                            }
-                            if (component.Split(':').First() == RegularType.Delete.ToString())
-                            {
-                                int DeleteRange; int DeleteIndex; bool Sequence;
-                                try // Ç¥Çö½Ä ¿¡·¯ Ã³¸®
-                                {
-                                    Tokens = component.Split(':').Last();// ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü, ¸Å°³º¯¼ö ºĞ·ù
-                                    Params = Tokens.Split(','); // ¸Å°³º¯¼ö °£ ºĞ·ù
-                                    DeleteRange = int.Parse(Params[0].Trim()); // »èÁ¦ÇÒ ¹üÀ§
-                                    DeleteIndex = int.Parse(Params[1].Trim()); // »èÁ¦ÇÒ À§Ä¡
-                                    Sequence = bool.Parse(Params[2].Trim()); // ÀÎµ¦½Ì ¼ø¼­
-                                }
-                                catch
-                                {
-                                    MessageBox.Show("ÀÌ¸§ º¯°æ Ç¥Çö½ÄÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.", "±¸¹® ¿À·ù!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true;
-                                    return;
-                                }
-                                if (DeleteIndex + DeleteRange > FileNameNoExt.Length || DeleteIndex < 0) // ÀÎµ¦½º ¿¡·¯ ¿¹¿ÜÃ³¸®
-                                {
-                                    MessageBox.Show(string.Format($"´ÙÀ½ ÆÄÀÏ¸í¿¡ ´ëÇÑ ÀÎµ¦½º°ªÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.\n{FileFullName}"), "º¯°æ Áß´Ü!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true; return;
-                                }
-                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'Æ÷ÇÔ
-                                {
-                                    if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
-                                    else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
-                                }
-                                else // (È®ÀåÀÚ Æ÷ÇÔ, '.'Æ÷ÇÔ), (È®ÀåÀÚ Æ÷ÇÔ, '.'¹ÌÆ÷ÇÔ) = (È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'¹ÌÆ÷ÇÔ)
-                                {
-                                    if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange);
-                                    else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange);
-                                }
-                            }
-                            if (component.Split(':').First() == RegularType.Replace.ToString())
-                            {
-                                string SearchStr; string ReplaceStr;
-                                try // Ç¥Çö½Ä ¿¡·¯ Ã³¸®
-                                {
-                                    Tokens = component.Split(':').Last(); // ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü, ¸Å°³º¯¼ö ºĞ·ù
-                                    Params = Tokens.Split(','); // ¸Å°³º¯¼ö °£ ºĞ·ù
-                                    SearchStr = Params[0].Trim().Trim('"'); // Ã£À» ¹®ÀÚ¿­
-                                    ReplaceStr = Params[1].Trim().Trim('"'); // ´ëÃ¼ÇÒ ¹®ÀÚ¿­
-                                }
-                                catch
-                                {
-                                    MessageBox.Show("ÀÌ¸§ º¯°æ Ç¥Çö½ÄÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.", "±¸¹® ¿À·ù!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true;
-                                    return;
-                                }
-                                if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'Æ÷ÇÔ
-                                {
-                                    if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr) + FileExt;
-                                }
-                                else // (È®ÀåÀÚ Æ÷ÇÔ, '.'Æ÷ÇÔ), (È®ÀåÀÚ Æ÷ÇÔ, '.'¹ÌÆ÷ÇÔ) = (È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'¹ÌÆ÷ÇÔ)
-                                {
-                                    if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr);
-                                }
-                            }
-                            if (component.Split(':').First() == RegularType.NewNameSet.ToString())
-                            {
-                                // ¸Å°³º¯¼ö °£ ºĞ·ù ¾øÀ½
-                                string NewStr;
-                                try // Ç¥Çö½Ä ¿¡·¯ Ã³¸®
-                                {
-                                    NewStr = component.Split(':').Last().Trim().Trim('"'); // »õ·Î¿î ¹®ÀÚ¿­
-                                }
-                                catch
-                                {
-                                    MessageBox.Show("ÀÌ¸§ º¯°æ Ç¥Çö½ÄÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.", "±¸¹® ¿À·ù!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true;
-                                    return;
-                                }
-                                ResultName += NewStr;
-                            }
-                            if (component.Split(':').First() == RegularType.AutoIncrement.ToString())
-                            {
-                                int StartNumber; int Increment;
-                                try // Ç¥Çö½Ä ¿¡·¯ Ã³¸®
-                                {
-                                    Tokens = component.Split(':').Last(); // ÀÌ¸§ º¯°æ Ç¥Çö½Ä À¯Çü, ¸Å°³º¯¼ö ºĞ·ù
-                                    Params = Tokens.Split(','); // ¸Å°³º¯¼ö °£ ºĞ·ù
-                                    StartNumber = int.Parse(Params[0].Trim());
-                                    Increment = int.Parse(Params[1].Trim());
-                                }
-                                catch
-                                {
-                                    MessageBox.Show("ÀÌ¸§ º¯°æ Ç¥Çö½ÄÀÌ Àß¸øµÇ¾ú½À´Ï´Ù.", "±¸¹® ¿À·ù!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                    e.Cancel = true;
-                                    return;
-                                }
-                                int CurrentNumber = StartNumber + Increment * Repetition++;
-                                ResultName += CurrentNumber.ToString();
-                                Console.WriteLine($"StartNumber:{StartNumber}, Increment;{Increment}, Repetition:{Repetition}");
-                            }
-                        }
+            object? args = e.Argument;
+            if (args == null || args is not string) return;
+            string pattern = (string)args;
 
-                        /* ÀÌ¸§º¯°æ ½ÇÇà */
-                        string SourceName = string.Empty; int FileNumber = 1;
-                        if (ResultName.Length > 0)
+            //SelectedRenameList // ì´ë¦„ ë³€ê²½ ë¦¬ìŠ¤íŠ¸
+            // ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ë¶„ë¥˜ 
+            // {} ëŒ€ë¶„ë¥˜ => ìš”ì†Œ ë¶„ë¥˜ 
+            // : ì¤‘ë¶„ë¥˜ => ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜•, ë§¤ê°œë³€ìˆ˜ ë¶„ë¥˜
+            // , ì†Œë¶„ë¥˜ => ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜
+            List<string> Components = [];
+            string Tokens = string.Empty;
+            string[] Params;
+            bool ReadState = false, SkipParen = false;
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                if (pattern[i] == '\"')
+                {
+                    if (SkipParen) SkipParen = false;
+                    else SkipParen = true;
+                }
+                if (!SkipParen)
+                {
+                    if (pattern[i] == '{') { ReadState = true; continue; }
+                    if (pattern[i] == '}')
+                    {
+                        Components.Add(Tokens);
+                        Tokens = string.Empty;
+                        ReadState = false;
+                        continue;
+                    }
+                }
+                if (ReadState) Tokens += pattern[i];
+            }
+            int Repetition = 0; // ëª¨ë“  í•­ëª©ì— ëŒ€í•œ ë°˜ë³µ ìˆ˜
+            foreach (string FileFullName in SelectedRenameList) // ì„ íƒí•œ ëª¨ë“  í•­ëª©ì— ëŒ€í•˜ì—¬
+            {
+                if (FileLoadWorker.CancellationPending == true) { e.Cancel = true; return; }
+                if (String.IsNullOrEmpty(FolderPath) == false) { e.Cancel = true; return; }
+                if (FolderPath is string FilePath)
+                {
+                    string FileNameNoExt = FileFullName, FileExt = string.Empty, ResultName = string.Empty;
+                    if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // í™•ì¥ì ë¯¸í¬í•¨, '.' í¬í•¨
+                    {
+                        FileExt = '.' + FileFullName.Split('.').Last();
+                        FileNameNoExt = FileFullName.Remove(FileFullName.Length - FileExt.Length);
+                    }
+                    // (í™•ì¥ì í¬í•¨, '.'í¬í•¨), (í™•ì¥ì í¬í•¨, '.'ë¯¸í¬í•¨) = (í™•ì¥ì ë¯¸í¬í•¨, '.'ë¯¸í¬í•¨)
+                    foreach (string component in Components) // ìš”ì†Œ ë¶„ë¥˜
+                    {
+                        if (component.Split(':').First() == NamePatternType.Append.ToString())
                         {
-                            if (FilePath.Length == 3)
+                            string AppendStr; int AppendIndex; bool Sequence;
+                            try // í‘œí˜„ì‹ ì—ëŸ¬ ì²˜ë¦¬
                             {
-                                SourceName = FilePath + FileFullName;
-                                ResultName = FilePath + ResultName;
+                                Tokens = component.Split(':').Last(); // ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜•, ë§¤ê°œë³€ìˆ˜ ë¶„ë¥˜
+                                Params = Tokens.Split(','); // ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜
+                                AppendStr = Params[0].Trim().Trim('"'); // ì¶”ê°€í•  ë¬¸ìì—´
+                                AppendIndex = int.Parse(Params[1].Trim()); // ì¶”ê°€í•  ìœ„ì¹˜
+                                Sequence = bool.Parse(Params[2].Trim()); // ì¸ë±ì‹± ìˆœì„œ
                             }
-                            else
+                            catch
                             {
-                                SourceName = FilePath + '\\' + FileFullName;
-                                ResultName = FilePath + '\\' + ResultName;
+                                MessageBox.Show("ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.", "êµ¬ë¬¸ ì˜¤ë¥˜!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true;
+                                return;
                             }
+                            if (AppendIndex > FileNameNoExt.Length || AppendIndex < 0) // ì¸ë±ìŠ¤ ì—ëŸ¬ ì˜ˆì™¸ì²˜ë¦¬
+                            {
+                                MessageBox.Show(string.Format($"ë‹¤ìŒ íŒŒì¼ëª…ì— ëŒ€í•œ ì¸ë±ìŠ¤ê°’ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.\n{FileFullName}"), "ë³€ê²½ ì¤‘ë‹¨!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true; return;
+                            }
+                            if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // í™•ì¥ì ë¯¸í¬í•¨, '.'í¬í•¨
+                            {
+                                if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..] + FileExt;
+                                else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..] + FileExt;
+                            }
+                            else // (í™•ì¥ì í¬í•¨, '.'í¬í•¨), (í™•ì¥ì í¬í•¨, '.'ë¯¸í¬í•¨) = (í™•ì¥ì ë¯¸í¬í•¨, '.'ë¯¸í¬í•¨)
+                            {
+                                if (Sequence) ResultName += FileNameNoExt[..AppendIndex] + AppendStr + FileNameNoExt[AppendIndex..];
+                                else ResultName += FileNameNoExt[..^AppendIndex] + AppendStr + FileNameNoExt[^AppendIndex..];
+                                // ì¶•ì•½ì–´ [..^AppendIndex] = Substring(0, targetFile.Length - AppendIndex)
+                            }
+                        }
+                        if (component.Split(':').First() == NamePatternType.Delete.ToString())
+                        {
+                            int DeleteRange; int DeleteIndex; bool Sequence;
+                            try // í‘œí˜„ì‹ ì—ëŸ¬ ì²˜ë¦¬
+                            {
+                                Tokens = component.Split(':').Last();// ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜•, ë§¤ê°œë³€ìˆ˜ ë¶„ë¥˜
+                                Params = Tokens.Split(','); // ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜
+                                DeleteRange = int.Parse(Params[0].Trim()); // ì‚­ì œí•  ë²”ìœ„
+                                DeleteIndex = int.Parse(Params[1].Trim()); // ì‚­ì œí•  ìœ„ì¹˜
+                                Sequence = bool.Parse(Params[2].Trim()); // ì¸ë±ì‹± ìˆœì„œ
+                            }
+                            catch
+                            {
+                                MessageBox.Show("ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.", "êµ¬ë¬¸ ì˜¤ë¥˜!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true;
+                                return;
+                            }
+                            if (DeleteIndex + DeleteRange > FileNameNoExt.Length || DeleteIndex < 0) // ì¸ë±ìŠ¤ ì—ëŸ¬ ì˜ˆì™¸ì²˜ë¦¬
+                            {
+                                MessageBox.Show(string.Format($"ë‹¤ìŒ íŒŒì¼ëª…ì— ëŒ€í•œ ì¸ë±ìŠ¤ê°’ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.\n{FileFullName}"), "ë³€ê²½ ì¤‘ë‹¨!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true; return;
+                            }
+                            if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // í™•ì¥ì ë¯¸í¬í•¨, '.'í¬í•¨
+                            {
+                                if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange) + FileExt;
+                                else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange) + FileExt;
+                            }
+                            else // (í™•ì¥ì í¬í•¨, '.'í¬í•¨), (í™•ì¥ì í¬í•¨, '.'ë¯¸í¬í•¨) = (í™•ì¥ì ë¯¸í¬í•¨, '.'ë¯¸í¬í•¨)
+                            {
+                                if (Sequence) ResultName += FileNameNoExt.Remove(DeleteIndex, DeleteRange);
+                                else ResultName += FileNameNoExt.Remove(FileNameNoExt.Length - DeleteIndex - DeleteRange, DeleteRange);
+                            }
+                        }
+                        if (component.Split(':').First() == NamePatternType.Replace.ToString())
+                        {
+                            string SearchStr; string ReplaceStr;
+                            try // í‘œí˜„ì‹ ì—ëŸ¬ ì²˜ë¦¬
+                            {
+                                Tokens = component.Split(':').Last(); // ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜•, ë§¤ê°œë³€ìˆ˜ ë¶„ë¥˜
+                                Params = Tokens.Split(','); // ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜
+                                SearchStr = Params[0].Trim().Trim('"'); // ì°¾ì„ ë¬¸ìì—´
+                                ReplaceStr = Params[1].Trim().Trim('"'); // ëŒ€ì²´í•  ë¬¸ìì—´
+                            }
+                            catch
+                            {
+                                MessageBox.Show("ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.", "êµ¬ë¬¸ ì˜¤ë¥˜!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true;
+                                return;
+                            }
+                            if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // í™•ì¥ì ë¯¸í¬í•¨, '.'í¬í•¨
+                            {
+                                if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr) + FileExt;
+                            }
+                            else // (í™•ì¥ì í¬í•¨, '.'í¬í•¨), (í™•ì¥ì í¬í•¨, '.'ë¯¸í¬í•¨) = (í™•ì¥ì ë¯¸í¬í•¨, '.'ë¯¸í¬í•¨)
+                            {
+                                if (FileNameNoExt.Contains(SearchStr)) ResultName += FileNameNoExt.Replace(SearchStr, ReplaceStr);
+                            }
+                        }
+                        if (component.Split(':').First() == NamePatternType.NewNameSet.ToString())
+                        {
+                            // ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜ ì—†ìŒ
+                            string NewStr;
+                            try // í‘œí˜„ì‹ ì—ëŸ¬ ì²˜ë¦¬
+                            {
+                                NewStr = component.Split(':').Last().Trim().Trim('"'); // ìƒˆë¡œìš´ ë¬¸ìì—´
+                            }
+                            catch
+                            {
+                                MessageBox.Show("ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.", "êµ¬ë¬¸ ì˜¤ë¥˜!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true;
+                                return;
+                            }
+                            ResultName += NewStr;
+                        }
+                        if (component.Split(':').First() == NamePatternType.Increment.ToString())
+                        {
+                            int StartNumber; int Increment;
+                            try // í‘œí˜„ì‹ ì—ëŸ¬ ì²˜ë¦¬
+                            {
+                                Tokens = component.Split(':').Last(); // ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ ìœ í˜•, ë§¤ê°œë³€ìˆ˜ ë¶„ë¥˜
+                                Params = Tokens.Split(','); // ë§¤ê°œë³€ìˆ˜ ê°„ ë¶„ë¥˜
+                                StartNumber = int.Parse(Params[0].Trim());
+                                Increment = int.Parse(Params[1].Trim());
+                            }
+                            catch
+                            {
+                                MessageBox.Show("ì´ë¦„ ë³€ê²½ í‘œí˜„ì‹ì´ ì˜ëª»ë˜ì—ˆìŠµë‹ˆë‹¤.", "êµ¬ë¬¸ ì˜¤ë¥˜!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                e.Cancel = true;
+                                return;
+                            }
+                            int CurrentNumber = StartNumber + Increment * Repetition++;
+                            ResultName += CurrentNumber.ToString();
+                            Console.WriteLine($"StartNumber:{StartNumber}, Increment;{Increment}, Repetition:{Repetition}");
+                        }
+                    }
+
+                    /* ì´ë¦„ë³€ê²½ ì‹¤í–‰ */
+                    string SourceName = string.Empty; int FileNumber = 1;
+                    if (ResultName.Length > 0)
+                    {
+                        if (FilePath.Length == 3)
+                        {
+                            SourceName = FilePath + FileFullName;
+                            ResultName = FilePath + ResultName;
                         }
                         else
                         {
-                            MessageBox.Show("¾Æ¹«°Íµµ º¯°æµÇÁö ¾Ê¾Ò½À´Ï´Ù.", "º¯°æ Ãë¼Ò!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            e.Cancel = true; return;
+                            SourceName = FilePath + '\\' + FileFullName;
+                            ResultName = FilePath + '\\' + ResultName;
                         }
-                        Console.WriteLine($"From:{SourceName}, To:{ResultName}");
-                        if (File.Exists(ResultName)) FileNumber++;
-                        if (FileNumber > 1) // Áßº¹ ¹ß»ı
-                        {
-                            if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'Æ÷ÇÔ
-                            {
-                                while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++; // ÆÄÀÏ Áßº¹ °Ë»ç
-                                Console.WriteLine("ÃÖÁ¾ °áÁ¤ ÆÄÀÏ¸í : {0}", ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt);
-                                File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
-                            }
-                            else // (È®ÀåÀÚ Æ÷ÇÔ, '.'Æ÷ÇÔ), (È®ÀåÀÚ Æ÷ÇÔ, '.'¹ÌÆ÷ÇÔ) = (È®ÀåÀÚ ¹ÌÆ÷ÇÔ, '.'¹ÌÆ÷ÇÔ)
-                            {
-                                while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++; // ÆÄÀÏ Áßº¹ °Ë»ç
-                                Console.WriteLine("ÃÖÁ¾ °áÁ¤ ÆÄÀÏ¸í : {0}", ResultName + '(' + FileNumber.ToString() + ')');
-                                File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
-                            }
-                        }
-                        else File.Move(SourceName, ResultName, false);
                     }
-                    ProgressPercentage = ++ProgressCounter / (double)SelectedRenameList.Count * 100;
-                    FileRenameWorker.ReportProgress((int)ProgressPercentage);
+                    else
+                    {
+                        MessageBox.Show("ì•„ë¬´ê²ƒë„ ë³€ê²½ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.", "ë³€ê²½ ì·¨ì†Œ!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        e.Cancel = true; return;
+                    }
+                    Console.WriteLine($"From:{SourceName}, To:{ResultName}");
+                    if (File.Exists(ResultName)) FileNumber++;
+                    if (FileNumber > 1) // ì¤‘ë³µ ë°œìƒ
+                    {
+                        if (!ContainExtensionSwitch.Checked && FileFullName.Contains('.')) // í™•ì¥ì ë¯¸í¬í•¨, '.'í¬í•¨
+                        {
+                            while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++; // íŒŒì¼ ì¤‘ë³µ ê²€ì‚¬
+                            Console.WriteLine("ìµœì¢… ê²°ì • íŒŒì¼ëª… : {0}", ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt);
+                            File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
+                        }
+                        else // (í™•ì¥ì í¬í•¨, '.'í¬í•¨), (í™•ì¥ì í¬í•¨, '.'ë¯¸í¬í•¨) = (í™•ì¥ì ë¯¸í¬í•¨, '.'ë¯¸í¬í•¨)
+                        {
+                            while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++; // íŒŒì¼ ì¤‘ë³µ ê²€ì‚¬
+                            Console.WriteLine("ìµœì¢… ê²°ì • íŒŒì¼ëª… : {0}", ResultName + '(' + FileNumber.ToString() + ')');
+                            File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
+                        }
+                    }
+                    else File.Move(SourceName, ResultName, false);
                 }
+                double ProgressPercentage = ++ProgressCounter / (double)SelectedRenameList.Count * 100;
+                FileRenameWorker.ReportProgress((int)ProgressPercentage);
             }
+
         }
+
         private void Worker_FileRenameProgress(object? sender, ProgressChangedEventArgs e)
         {
             LoadProcessBar.Value = e.ProgressPercentage;
-            StatusLabel1.Text = string.Format("ÀÌ¸§ º¯°æ Áß... {0}%", e.ProgressPercentage);
+            StatusLabel1.Text = string.Format("ì´ë¦„ ë³€ê²½ ì¤‘... {0}%", e.ProgressPercentage);
         }
+
         private void Worker_FileRenameCompleted(object? sender, RunWorkerCompletedEventArgs e)
         {
             ProgressCounter = 0;
@@ -544,7 +464,7 @@ namespace FileRenamer
         #endregion
 
         #region FileListView 
-        private void FileListView_ColumnClick(object sender, ColumnClickEventArgs e) // FileListView Column Å¬¸¯(ÀçÁ¤·Ä) 
+        private void FileListView_ColumnClick(object? sender, ColumnClickEventArgs e) // FileListView Column í´ë¦­(ì¬ì •ë ¬) 
         {
             if (e.Column == 0)
             {
@@ -555,7 +475,7 @@ namespace FileRenamer
             }
             else
             {
-                if (FileListView.Columns[e.Column].Text.Contains('¡ä'))
+                if (FileListView.Columns[e.Column].Text.Contains('â–½'))
                 {
                     FileListView.ListViewItemSorter = new ListViewItemComparer(e.Column, "desc");
                     Console.WriteLine("Desc");
@@ -563,11 +483,11 @@ namespace FileRenamer
                     {
                         if (Columns.Index != 0)
                         {
-                            Columns.Text = Columns.Text.Replace("¡ä", "");
-                            Columns.Text = Columns.Text.Replace("¡â", "");
+                            Columns.Text = Columns.Text.Replace("â–½", "");
+                            Columns.Text = Columns.Text.Replace("â–³", "");
                         }
                     }
-                    FileListView.Columns[e.Column].Text += "¡â";
+                    FileListView.Columns[e.Column].Text += "â–³";
                 }
                 else
                 {
@@ -577,17 +497,18 @@ namespace FileRenamer
                     {
                         if (Columns.Index != 0)
                         {
-                            Columns.Text = Columns.Text.Replace("¡ä", "");
-                            Columns.Text = Columns.Text.Replace("¡â", "");
+                            Columns.Text = Columns.Text.Replace("â–½", "");
+                            Columns.Text = Columns.Text.Replace("â–³", "");
                         }
                     }
-                    FileListView.Columns[e.Column].Text += "¡ä";
+                    FileListView.Columns[e.Column].Text += "â–½";
                 }
             }
         }
-        private void FileListView_KeyDown(object sender, KeyEventArgs e) // FileListView Å°º¸µå ÀÌº¥Æ® 
+
+        private void FileListView_KeyDown(object? sender, KeyEventArgs e) // FileListView í‚¤ë³´ë“œ ì´ë²¤íŠ¸ 
         {
-            if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) { this.Close(); return; }
+            if (e.KeyCode == Keys.Escape || (ModifierKeys == Keys.Control && e.KeyCode == Keys.W)) { Close(); return; }
             if (ModifierKeys == Keys.Control && e.KeyCode == Keys.A) { foreach (ListViewItem item in FileListView.Items) item.Selected = true; return; }
             if (ModifierKeys == Keys.Control && e.KeyCode == Keys.N) { New_File(); return; }
             if (ModifierKeys == Keys.Control && e.KeyCode == Keys.O) { OpenFolder(); return; }
@@ -596,7 +517,8 @@ namespace FileRenamer
             if (e.KeyCode == Keys.F2) { Rename_File(); return; }
             if (e.KeyCode == Keys.F5) { Refresh_FileList(); return; }
         }
-        private void FileListView_MouseDown(object sender, MouseEventArgs e) // FileListView Å¬¸¯ ÀÌº¥Æ® 
+
+        private void FileListView_MouseDown(object? sender, MouseEventArgs e) // FileListView í´ë¦­ ì´ë²¤íŠ¸ 
         {
             if (e.Button == MouseButtons.Left && e.Clicks == 2 && FileListView.SelectedItems.Count == 1)
             {
@@ -604,203 +526,85 @@ namespace FileRenamer
                 Process_Start();
                 return;
             }
-            // DoubleClick, Left : ÆÄÀÏ ½ÇÇà 
-            // None Select, Right : ContextMenu(»õ ÆÄÀÏ(&N), ÀüÃ¼ ¼±ÅÃ(&A), »õ·Î°íÄ§(&E), |, »õ ÀÛ¾÷¿µ¿ª ¼³Á¤(&S), ÆÄÀÏ Å½»ö±â¿¡¼­ ¿­±â)
-            // 1 Select, Right : ContextMenu(ÆÄÀÏ ½ÇÇà(&O), ÀüÃ¼ ¼±ÅÃ(&A), »õ·Î°íÄ§(&E), |,ÀÌ¸§ ¹Ù²Ù±â(&M), »èÁ¦(&D), |, »õ ÀÛ¾÷¿µ¿ª ¼³Á¤(&S), ÆÄÀÏ Å½»ö±â¿¡¼­ ¿­±â)
-            // Above 2 Select, Right : ContextMenu(ÆÄÀÏ ½ÇÇà(&O), ÀüÃ¼ ¼±ÅÃ(&A), »õ·Î°íÄ§(&E), |, »èÁ¦(&D), |, »õ ÀÛ¾÷¿µ¿ª ¼³Á¤(&S), ÆÄÀÏ Å½»ö±â¿¡¼­ ¿­±â)
-            FileListMenu = new();
+
+            // DoubleClick, Left : íŒŒì¼ ì‹¤í–‰ 
+            // None Select, Right : ContextMenu(ìƒˆ íŒŒì¼(&N), ì „ì²´ ì„ íƒ(&A), ìƒˆë¡œê³ ì¹¨(&E), |, ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S), íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°)
+            // 1 Select, Right : ContextMenu(íŒŒì¼ ì‹¤í–‰(&O), ì „ì²´ ì„ íƒ(&A), ìƒˆë¡œê³ ì¹¨(&E), |,ì´ë¦„ ë°”ê¾¸ê¸°(&M), ì‚­ì œ(&D), |, ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S), íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°)
+            // Above 2 Select, Right : ContextMenu(íŒŒì¼ ì‹¤í–‰(&O), ì „ì²´ ì„ íƒ(&A), ìƒˆë¡œê³ ì¹¨(&E), |, ì‚­ì œ(&D), |, ìƒˆ ì‘ì—…ì˜ì—­ ì„¤ì •(&S), íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°)
             if (e.Button == MouseButtons.Right && FolderPath != null)
             {
+                Point point = new(FileListView.Location.X + e.X, FileListView.Location.Y + e.Y);
                 if (FileListView.SelectedItems.Count == 0)
                 {
                     Console.WriteLine("None Select, Right");
-                    FileListMenu.Items.Add("»õ ÆÄÀÏ(&N)", null, New_File_Event);
-                    FileListMenu.Items.Add("ÀüÃ¼ ¼±ÅÃ(&A)", null, Select_All_Event);
-                    FileListMenu.Items.Add("»õ·Î °íÄ§(&E)", null, Refresh_FileList_Event);
+                    FileListMenuNoneSelect.Show(WorkSpacePanel, point);
                 }
                 if (FileListView.SelectedItems.Count == 1)
                 {
                     Console.WriteLine("1 Select, Right");
-                    FileListMenu.Items.Add("¿­±â(&O)", null, Process_Start_Event);
-                    FileListMenu.Items.Add("ÀüÃ¼ ¼±ÅÃ(&A)", null, Select_All_Event);
-                    FileListMenu.Items.Add("»õ·Î °íÄ§(&E)", null, Refresh_FileList_Event);
-                    FileListMenu.Items.Add(new ToolStripSeparator());
-                    FileListMenu.Items.Add("ÀÌ¸§ ¹Ù²Ù±â(&M)", null, Rename_File_Event);
-                    FileListMenu.Items.Add("»èÁ¦(&D)", null, Delete_File_Event);
+                    FileListMenuSingleSelect.Show(WorkSpacePanel, point);
                 }
                 if (FileListView.SelectedItems.Count > 1)
                 {
                     Console.WriteLine("Above 2 Select, Right");
-                    FileListMenu.Items.Add("¿­±â(&O)", null, Process_Start_Event);
-                    FileListMenu.Items.Add("ÀüÃ¼ ¼±ÅÃ(&A)", null, Select_All_Event);
-                    FileListMenu.Items.Add("»õ·Î °íÄ§(&E)", null, Refresh_FileList_Event);
-                    FileListMenu.Items.Add(new ToolStripSeparator());
-                    FileListMenu.Items.Add("»èÁ¦(&D)", null, Delete_File_Event);
+                    FileListMenuMultiSelect.Show(WorkSpacePanel, point);
                 }
-                FileListMenu.Items.Add(new ToolStripSeparator());
-                FileListMenu.Items.Add("»õ ÀÛ¾÷¿µ¿ª ¼³Á¤(&S)", null, New_WorkSpace_Event);
-                FileListMenu.Items.Add("ÆÄÀÏ Å½»ö±â¿¡¼­ ¿­±â", null, Open_Explorer_Event);
-                FileListMenu.Show(WorkSpacePanel, new Point(FileListView.Location.X + e.X, FileListView.Location.Y + e.Y));
-            }
-        }
-        private void Process_Start_Event(object? sender, EventArgs e) { Process_Start(); } // ÆÄÀÏ ½ÇÇà(&O)Strip 
-        private void Process_Start() // ÆÄÀÏ ½ÇÇà 
-        {
-            using Process FileOpen = new();
-            FileOpen.StartInfo.FileName = "explorer";
-            if (FolderPath != null)
-            {
-                bool ErrorState = false;
-                string OpenFileName, ErrorMessage;
-                ErrorMessage = "¼±ÅÃÇÑ ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.\n»õ·Î °íÄ§ ÈÄ ´Ù½Ã ½ÃµµÇØ ÁÖ¼¼¿ä.\n\n";
-                foreach (ListViewItem items in FileListView.SelectedItems)
-                {
-                    if (FolderPath.Length == 3) OpenFileName = FolderPath + items.SubItems[1].Text;
-                    else OpenFileName = FolderPath + '\\' + items.SubItems[1].Text;
-                    if (File.Exists(OpenFileName))
-                    {
-                        FileOpen.StartInfo.Arguments = OpenFileName;
-                        FileOpen.Start();
-                    }
-                    else
-                    {
-                        ErrorMessage += OpenFileName + '\n';
-                        ErrorState = true;
-                    }
-                }
-                if (ErrorState) MessageBox.Show(ErrorMessage, "ÆÄÀÏ ¾øÀ½");
             }
         }
 
-        /* µå·¡±× & µå·Ó */
-        private void FileListView_DragEnter(object sender, DragEventArgs e)
+        private void Process_Start_Event(object? sender, EventArgs e) { Process_Start(); } // íŒŒì¼ ì‹¤í–‰(&O)Strip 
+
+        /* ë“œë˜ê·¸ & ë“œë¡­ */
+        private void FileListView_DragEnter(object? sender, DragEventArgs e)
         {
-            if (e.Data == null) return;
-            string[] folder = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (folder.Length == 1)
+            if (e.Data == null || e.Data.GetData(DataFormats.FileDrop) == null) return;
+            object? data = e.Data.GetData(DataFormats.FileDrop);
+            if (data == null) return;
+            string[] folder = (string[])data;
+            if (folder.Length != 1) return;
+            foreach (string file in folder)
             {
-                foreach (string file in folder)
-                {
-                    // ÆÄÀÏÀÇ ¼Ó¼ºÀ» °¡Á®¿Í µğ·ºÅä¸® ¿©ºÎ¸¦ °Ë»ç
-                    FileAttributes attributes = File.GetAttributes(file);
-                    if ((attributes & FileAttributes.Directory) != FileAttributes.Directory)
-                    {
-                        // µğ·ºÅä¸®ÀÎ °æ¿ì, Drag & Drop Çã¿ëÇÏÁö ¾ÊÀ½
-                        e.Effect = DragDropEffects.None;
-                        return;
-                    }
-                }
-                // ÆÄÀÏ¸¸ ÀÖ´Â °æ¿ì, Drag & Drop Çã¿ë
-                e.Effect = DragDropEffects.Copy;
+                // íŒŒì¼ì˜ ì†ì„±ì„ ê°€ì ¸ì™€ ë””ë ‰í† ë¦¬ ì—¬ë¶€ë¥¼ ê²€ì‚¬ -> ë””ë ‰í† ë¦¬ê°€ ì•„ë‹Œ ê²½ìš°, Drag & Drop í—ˆìš©í•˜ì§€ ì•ŠìŒ
+                FileAttributes attributes = File.GetAttributes(file);
+                if ((attributes & FileAttributes.Directory) != FileAttributes.Directory) return;
             }
-            else e.Effect = DragDropEffects.None;
+            // ë‹¨ì¼ ë””ë ‰í† ë¦¬ì¸ ê²½ìš°, Drag & Drop í—ˆìš©
+            e.Effect = DragDropEffects.Copy;
         }
-        private void FileListView_DragDrop(object sender, DragEventArgs e)
+
+        private void FileListView_DragDrop(object? sender, DragEventArgs e)
         {
-            if (e.Data == null) return;
-            string[] folder = (string[])e.Data.GetData(DataFormats.FileDrop);
+            if (e.Data == null || e.Data.GetData(DataFormats.FileDrop) == null) return;
+            object? data = e.Data.GetData(DataFormats.FileDrop);
+            if (data == null) return;
+            string[] folder = (string[])data;
             Console.WriteLine("folder : {0}", folder[0]);
             OpenFolder(folder[0]);
         }
 
-        /* ¿ìÅ¬¸¯ ¸Ş´º */
-        private void New_File_Event(object? sender, EventArgs e) { New_File(); } // »õ ÆÄÀÏ(&N)Strip 
-        private void New_File() // »õ ÆÄÀÏ 
-        {
-            if (FolderPath != null)
-            {
-                string NewFileFull = FolderPath + '\\' + DefaultFileName;
-                int FileNumber = 1;
-                if (File.Exists(NewFileFull)) FileNumber++;
-                while (File.Exists(NewFileFull + '(' + FileNumber.ToString() + ')')) FileNumber++;
-                if (FileNumber == 1)
-                {
-                    File.Create(NewFileFull).Close();
-                    FileInfo NewFileInfo = new(NewFileFull);
-                    long FileSize = NewFileInfo.Length;
-                    if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
-                    else if (FileSize == 0) FileSize = 0;
-                    else FileSize = 1;
-                    string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
-                    ListViewItem NewItem = new(ItemInfo);
-                    FileListView.Items.Add(NewItem);
-                    FileItemInfo.Add(NewItem);
-                }
-                else
-                {
-                    NewFileFull += '(' + FileNumber.ToString() + ')';
-                    File.Create(NewFileFull).Close();
-                    FileInfo NewFileInfo = new(NewFileFull);
-                    long FileSize = NewFileInfo.Length;
-                    if (FileSize >= 1024) FileSize /= 1024; // kilobyte 
-                    else if (FileSize == 0) FileSize = 0;
-                    else FileSize = 1;
-                    string[] ItemInfo = { "", NewFileInfo.Name, NewFileInfo.Extension, NewFileInfo.CreationTime.ToString(), NewFileInfo.LastWriteTime.ToString(), string.Format($"{FileSize:#,####0}KB") };
-                    ListViewItem NewItem = new(ItemInfo);
-                    FileListView.Items.Add(NewItem);
-                    FileItemInfo.Add(NewItem);
-                }
-                if (FileList != null) StatusLabel1.Text = string.Format("{0}°³ Ç×¸ñ", FileItemInfo.Count);
-            }
-        }
-        private void Select_All_Event(object? sender, EventArgs e) // ÀüÃ¼ ¼±ÅÃ(&A)Strip 
+        /* ìš°í´ë¦­ ë©”ë‰´ */
+        private void New_File_Event(object? sender, EventArgs e) { New_File(); } // ìƒˆ íŒŒì¼(&N)Strip 
+
+        private void Select_All_Event(object? sender, EventArgs e) // ì „ì²´ ì„ íƒ(&A)Strip 
         {
             foreach (ListViewItem item in FileListView.Items) item.Selected = true;
         }
-        private void Refresh_FileList_Event(object? sender, EventArgs e) { Refresh_FileList(); } // »õ·Î°íÄ§(&E)Strip 
-        private void Refresh_FileList()
-        {
-            if (FolderPath != null)
-            {
-                if (!FileLoadWorker.IsBusy)
-                {
-                    FileListView.Items.Clear();
-                    FileLoadWorker.RunWorkerAsync(FolderPath);
-                }
-                else
-                {
-                    FileListView.Items.Clear();
-                    FileLoadWorker.CancelAsync();
-                }
-                StatusLabel2.Text = string.Empty;
-            }
-        }
-        private void Rename_File_Event(object? sender, EventArgs e) { Rename_File(); } // ÀÌ¸§ ¹Ù²Ù±â(&M)Strip 
 
-        /// <summary>
-        /// ÀÌ¸§ ¹Ù²Ù±â - ´ÜÀÏ¼±ÅÃ 
-        /// </summary>
-        private void Rename_File()
-        {
-            if (FileListView.SelectedItems.Count > 0)
-            {
-                TextBox RenamerBox = new()
-                {
-                    Text = FileListView.SelectedItems[0].SubItems[1].Text,
-                    Location = FileListView.SelectedItems[0].SubItems[1].Bounds.Location
-                };
-                if (TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("¸¼Àº °íµñ", 9F)).Width <= 200) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("¸¼Àº °íµñ", 9F));
-                else RenamerBox.Size = new Size(200, RenamerBox.Height);
-                RenamerBox.KeyDown += RenamerBox_KeyDown;
-                RenamerBox.KeyPress += RenamerBox_KeyPress;
-                RenamerBox.TextChanged += RenamerBox_TextChanged;
-                RenamerBox.Leave += RenamerBox_Leave;
-                FileListView.Controls.Add(RenamerBox);
-                RenamerBox.BringToFront();
-                RenamerBox.Select();
-                RenameState = true;
-            }
-        }
+        private void Refresh_FileList_Event(object? sender, EventArgs e) { Refresh_FileList(); } // ìƒˆë¡œê³ ì¹¨(&E)Strip 
+
+        private void Rename_File_Event(object? sender, EventArgs e) { Rename_File(); } // ì´ë¦„ ë°”ê¾¸ê¸°(&M)Strip 
+
         private void RenamerBox_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter) { RenameState = true; FileListView.Select(); return; }
             if (e.KeyCode == Keys.Escape) { RenameState = false; FileListView.Select(); return; }
         }
+
         private void RenamerBox_KeyPress(object? sender, KeyPressEventArgs e)
         {
             if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true;
 
-            // ÆÄÀÏ¸í À¯È¿¼º °Ë»ç KeyCode 
+            // íŒŒì¼ëª… ìœ íš¨ì„± ê²€ì‚¬ KeyCode 
             // /,?, |, \, <, >, ", *, :
             if (e.KeyChar == '/' || e.KeyChar == '?' || e.KeyChar == '|' || e.KeyChar == '\\' || e.KeyChar == '<' || e.KeyChar == '>' || e.KeyChar == '"' || e.KeyChar == '*' || e.KeyChar == ':' || e.KeyChar == '<')
             {
@@ -808,138 +612,96 @@ namespace FileRenamer
                 e.KeyChar = Convert.ToChar(0);
             }
         }
+
         private void RenamerBox_TextChanged(object? sender, EventArgs e)
         {
             if (sender is TextBox RenamerBox)
             {
-                if (TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("¸¼Àº °íµñ", 9F)).Width <= 200) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("¸¼Àº °íµñ", 9F));
-                else RenamerBox.Size = new Size(200, RenamerBox.Height); // ÃÖ¼Ò Å©±â 200
+                if (TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("ë§‘ì€ ê³ ë”•", 9F)).Width <= 200) RenamerBox.Size = TextRenderer.MeasureText(RenamerBox.Text + "  ", new Font("ë§‘ì€ ê³ ë”•", 9F));
+                else RenamerBox.Size = new Size(200, RenamerBox.Height); // ìµœì†Œ í¬ê¸° 200
             }
         }
+
         private void RenamerBox_Leave(object? sender, EventArgs e)
         {
-            if (RenameState)
+            if (RenameState && sender is TextBox RenamerBox)
             {
-                if (sender is TextBox RenamerBox)
+                if (string.IsNullOrWhiteSpace(RenamerBox.Text)) { FileListView.Controls.RemoveAt(0); return; } // ëª¨ë‘ ê³µë°±ì´ê±°ë‚˜ ë¹ˆ ë¬¸ìì—´
+                while (RenamerBox.Text.Last() == '.') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // ë§ˆì§€ë§‰ '.' ì‚­ì œ
+                while (RenamerBox.Text.First() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(0, 1); // ì²˜ìŒ ' ' ì‚­ì œ
+                while (RenamerBox.Text.Last() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // ë§ˆì§ë§‰ ' ' ì‚­ì œ
+                if (FolderPath != null && RenamerBox.Text != string.Empty)
                 {
-                    if (string.IsNullOrWhiteSpace(RenamerBox.Text)) { FileListView.Controls.RemoveAt(0); return; } // ¸ğµÎ °ø¹éÀÌ°Å³ª ºó ¹®ÀÚ¿­
-                    while (RenamerBox.Text.Last() == '.') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // ¸¶Áö¸· '.' »èÁ¦
-                    while (RenamerBox.Text.First() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(0, 1); // Ã³À½ ' ' »èÁ¦
-                    while (RenamerBox.Text.Last() == ' ') RenamerBox.Text = RenamerBox.Text.Remove(RenamerBox.Text.Length - 1); // ¸¶Á÷¸· ' ' »èÁ¦
-                    if (FolderPath != null && RenamerBox.Text != string.Empty)
+                    string SourceName, ResultName;
+                    if (FolderPath.Length == 3)
                     {
-                        string SourceName, ResultName;
-                        if (FolderPath.Length == 3)
+                        SourceName = FolderPath + FileListView.SelectedItems[0].SubItems[1].Text;
+                        ResultName = FolderPath + RenamerBox.Text;
+                    }
+                    else
+                    {
+                        SourceName = FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
+                        ResultName = FolderPath + '\\' + RenamerBox.Text;
+                    }
+                    if (SourceName == ResultName) { FileListView.Controls.RemoveAt(0); return; } // ë³€ê²½ ì „ ì´ë¦„ == ë³€ê²½ í›„ ì´ë¦„ => return
+                    string FileNameNoExt = RenamerBox.Text, FileExt = string.Empty;
+                    if (RenamerBox.Text.Contains('.'))
+                    {
+                        FileExt = '.' + RenamerBox.Text.Split('.').Last();
+                        FileNameNoExt = RenamerBox.Text.Remove(RenamerBox.Text.Length - FileExt.Length);
+                    }
+                    if (File.Exists(SourceName))
+                    {
+                        int FileNumber = 1;
+                        if (File.Exists(ResultName)) FileNumber++; // íŒŒì¼ ì¤‘ë³µ
+                        if (FileNumber > 1)
                         {
-                            SourceName = FolderPath + FileListView.SelectedItems[0].SubItems[1].Text;
-                            ResultName = FolderPath + RenamerBox.Text;
-                        }
-                        else
-                        {
-                            SourceName = FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
-                            ResultName = FolderPath + '\\' + RenamerBox.Text;
-                        }
-                        if (SourceName == ResultName) { FileListView.Controls.RemoveAt(0); return; } // º¯°æ Àü ÀÌ¸§ == º¯°æ ÈÄ ÀÌ¸§ => return
-                        string FileNameNoExt = RenamerBox.Text, FileExt = string.Empty;
-                        if (RenamerBox.Text.Contains('.'))
-                        {
-                            FileExt = '.' + RenamerBox.Text.Split('.').Last();
-                            FileNameNoExt = RenamerBox.Text.Remove(RenamerBox.Text.Length - FileExt.Length);
-                        }
-                        if (File.Exists(SourceName))
-                        {
-                            int FileNumber = 1;
-                            if (File.Exists(ResultName)) FileNumber++; // ÆÄÀÏ Áßº¹
-                            if (FileNumber > 1)
+                            if (ResultName.Contains('.'))
                             {
-                                if (ResultName.Contains('.'))
+                                while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++;
+                                if (MessageBox.Show(string.Format("ì´ ìœ„ì¹˜ì— ì´ë¯¸ {0} íŒŒì¼ì´ ìˆìŠµë‹ˆë‹¤. {1}ë¡œ ë³€ê²½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?", RenamerBox.Text, FileNameNoExt + '(' + FileNumber.ToString() + ')' + FileExt), "íŒŒì¼ ì¤‘ë³µ", MessageBoxButtons.OKCancel) == DialogResult.OK)
                                 {
-                                    while (File.Exists(ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt)) FileNumber++;
-                                    if (MessageBox.Show(string.Format("ÀÌ À§Ä¡¿¡ ÀÌ¹Ì {0} ÆÄÀÏÀÌ ÀÖ½À´Ï´Ù. {1}·Î º¯°æÇÏ½Ã°Ú½À´Ï±î?", RenamerBox.Text, FileNameNoExt + '(' + FileNumber.ToString() + ')' + FileExt), "ÆÄÀÏ Áßº¹", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                                    {
-                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
-                                        FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
-                                        FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
-                                        File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
-                                    }
-                                }
-                                else
-                                {
-                                    while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++;
-                                    if (MessageBox.Show(string.Format("ÀÌ À§Ä¡¿¡ ÀÌ¹Ì {0} ÆÄÀÏÀÌ ÀÖ½À´Ï´Ù. {1}·Î º¯°æÇÏ½Ã°Ú½À´Ï±î?", RenamerBox.Text, ResultName + '(' + FileNumber.ToString() + ')'), "ÆÄÀÏ Áßº¹", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                                    {
-                                        FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
-                                        FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
-                                        FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
-                                        File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
-                                    }
+                                    FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
+                                    FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber + ')' + FileExt;
+                                    FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
+                                    File.Move(SourceName, ResultName.Remove(ResultName.Length - FileExt.Length) + '(' + FileNumber.ToString() + ')' + FileExt, false);
                                 }
                             }
                             else
                             {
-                                FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text;
-                                FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
-                                if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
-                                else FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
-                                File.Move(SourceName, ResultName, false);
+                                while (File.Exists(ResultName + '(' + FileNumber.ToString() + ')')) FileNumber++;
+                                if (MessageBox.Show(string.Format("ì´ ìœ„ì¹˜ì— ì´ë¯¸ {0} íŒŒì¼ì´ ìˆìŠµë‹ˆë‹¤. {1}ë¡œ ë³€ê²½í•˜ì‹œê² ìŠµë‹ˆê¹Œ?", RenamerBox.Text, ResultName + '(' + FileNumber.ToString() + ')'), "íŒŒì¼ ì¤‘ë³µ", MessageBoxButtons.OKCancel) == DialogResult.OK)
+                                {
+                                    FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
+                                    FileListView.SelectedItems[0].SubItems[1].Text = FileNameNoExt + '(' + FileNumber.ToString() + ')';
+                                    FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
+                                    File.Move(SourceName, ResultName + '(' + FileNumber.ToString() + ')', false);
+                                }
                             }
                         }
-                        else Refresh_FileList();
+                        else
+                        {
+                            FileItemInfo[FileItemInfo.IndexOf(FileListView.SelectedItems[0])].Text = RenamerBox.Text;
+                            FileListView.SelectedItems[0].SubItems[1].Text = RenamerBox.Text;
+                            if (FileListView.SelectedItems[0].SubItems[1].Text.Contains('.')) FileListView.SelectedItems[0].SubItems[2].Text = FileExt;
+                            else FileListView.SelectedItems[0].SubItems[2].Text = string.Empty;
+                            File.Move(SourceName, ResultName, false);
+                        }
                     }
+                    else Refresh_FileList();
                 }
             }
             FileListView.Controls.RemoveAt(0);
         }
-        private void Delete_File_Event(object? sender, EventArgs e) { Delete_File(); } // »èÁ¦(&D)Strip 
-        private void Delete_File() // »èÁ¦ 
-        {
-            if (FolderPath != null)
-            {
-                bool ErrorState = false;
-                string DeleteFileName, ErrorMessage, DeleteFiles = string.Empty;
-                List<ListViewItem> DeleteFileList = new();
-                ErrorMessage = "¼±ÅÃÇÑ ÆÄÀÏÀÌ Á¸ÀçÇÏÁö ¾Ê½À´Ï´Ù.\n»õ·Î °íÄ§ ÈÄ ´Ù½Ã ½ÃµµÇØ ÁÖ¼¼¿ä.\n\n";
-                foreach (ListViewItem items in FileListView.SelectedItems)
-                {
-                    if (FolderPath.Length == 3) DeleteFileName = FolderPath + items.SubItems[1].Text;
-                    else DeleteFileName = FolderPath + '\\' + items.SubItems[1].Text;
-                    if (File.Exists(DeleteFileName)) DeleteFileList.Add(items);
-                    else
-                    {
-                        ErrorMessage += DeleteFileName + '\n';
-                        ErrorState = true;
-                    }
-                }
-                if (ErrorState) MessageBox.Show(ErrorMessage, "ÆÄÀÏ ¾øÀ½");
-                else
-                {
-                    string DeleteMessage = string.Empty;
-                    int DeleteCount = 0; // »èÁ¦ÇÒ ÆÄÀÏ °³¼ö 
-                    foreach (ListViewItem delfile in DeleteFileList)
-                    {
-                        if (DeleteCount++ < 10) DeleteMessage += delfile.SubItems[1].Text + ' ' + delfile.SubItems[5].Text + '\n';
-                    }
-                    if (DeleteCount > 10) DeleteMessage += "  . . .\n";
-                    DeleteMessage += string.Format("\nÀ§¿¡ ÆÄÀÏÀ» Æ÷ÇÔÇÑ ÃÑ {0}°³ÀÇ ÆÄÀÏÀ» ¿ÏÀüÈ÷ »èÁ¦ÇÏ½Ã°Ú½À´Ï±î?", DeleteCount);
-                    if (MessageBox.Show(DeleteMessage, "ÆÄÀÏ »èÁ¦", MessageBoxButtons.OKCancel) == DialogResult.OK)
-                    {
-                        foreach (ListViewItem delfile in DeleteFileList)
-                        {
-                            if (FolderPath.Length == 3) File.Delete(FolderPath + delfile.SubItems[1].Text);
-                            else File.Delete(FolderPath + '\\' + delfile.SubItems[1].Text);
-                            FileListView.Items.Remove(delfile);
-                            FileItemInfo.Remove(delfile);
-                        }
-                    }
-                }
-                if (FileList != null) StatusLabel1.Text = string.Format("{0}°³ Ç×¸ñ", FileItemInfo.Count);
-            }
-        }
-        private void New_WorkSpace_Event(object? sender, EventArgs e) // »õ ÀÛ¾÷¿µ¿ª(&S)Strip 
+
+        private void Delete_File_Event(object? sender, EventArgs e) { Delete_File(); } // ì‚­ì œ(&D)Strip 
+
+        private void New_WorkSpace_Event(object? sender, EventArgs e) // ìƒˆ ì‘ì—…ì˜ì—­(&S)Strip 
         {
             OpenFolder();
         }
-        private void Open_Explorer_Event(object? sender, EventArgs e) // ÆÄÀÏ Å½»ö±â¿¡¼­ ¿­±âStrip 
+
+        private void Open_Explorer_Event(object? sender, EventArgs e) // íŒŒì¼ íƒìƒ‰ê¸°ì—ì„œ ì—´ê¸°Strip 
         {
             string OpenFileFullName;
             if (FolderPath != null)
@@ -950,21 +712,21 @@ namespace FileRenamer
                     else OpenFileFullName = "/select, " + FolderPath + '\\' + FileListView.SelectedItems[0].SubItems[1].Text;
                     Console.WriteLine(OpenFileFullName);
                     if (FolderPath != null) Process.Start("explorer.exe", OpenFileFullName);
-                    else StatusLabel1.Text = "ÇöÀç ¼³Á¤µÈ ÀÛ¾÷ °æ·Î ¾ø½À´Ï´Ù.";
+                    else StatusLabel1.Text = "í˜„ì¬ ì„¤ì •ëœ ì‘ì—… ê²½ë¡œ ì—†ìŠµë‹ˆë‹¤.";
                 }
                 else
                 {
                     if (FolderPath != null) Process.Start("explorer.exe", FolderPath);
-                    else StatusLabel1.Text = "ÇöÀç ¼³Á¤µÈ ÀÛ¾÷ °æ·Î ¾ø½À´Ï´Ù.";
+                    else StatusLabel1.Text = "í˜„ì¬ ì„¤ì •ëœ ì‘ì—… ê²½ë¡œ ì—†ìŠµë‹ˆë‹¤.";
                 }
             }
         }
         #endregion
 
         #region DateChange Event
-        private void DateChangeButton_Click(object sender, EventArgs e)
+        private void DateChangeButton_Click(object? sender, EventArgs e)
         {
-            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("¼±ÅÃÇÑ ÆÄÀÏÀÌ ¾ø½À´Ï´Ù.", "´ë»ó ¾øÀ½", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
+            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("ì„ íƒí•œ íŒŒì¼ì´ ì—†ìŠµë‹ˆë‹¤.", "ëŒ€ìƒ ì—†ìŒ", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
             if (FolderPath == null) return;
             int hour = int.Parse(TimeSetMasked.Text[..2]);
             int minute = int.Parse(TimeSetMasked.Text.Substring(3, 2));
@@ -979,12 +741,12 @@ namespace FileRenamer
                     file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
                     file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0);
                 }
-                MessageBox.Show("³¯Â¥ ¹× ½Ã°£ÀÌ º¯°æµÇ¾ú½À´Ï´Ù.", "º¯°æ ¿Ï·á", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("ë‚ ì§œ ë° ì‹œê°„ì´ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.", "ë³€ê²½ ì™„ë£Œ", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 Refresh_FileList();
             }
             else
             {
-                ChangeDateTime ChangeDateTimeForm = new();
+                using ChangeDateTime ChangeDateTimeForm = new();
                 ChangeDateTimeForm.StartPosition = FormStartPosition.CenterParent;
                 ChangeDateTimeForm.ApplyDateTime += delegate (bool make, bool modify, bool access)
                 {
@@ -998,17 +760,18 @@ namespace FileRenamer
                         if (modify) { file.LastWriteTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0); changeAnything = true; }
                         if (access) { file.LastAccessTime = new DateTime(DatePicker.Value.Year, DatePicker.Value.Month, DatePicker.Value.Day, hour, minute, 0); changeAnything = true; }
                     }
-                    if (!changeAnything) MessageBox.Show("¾Æ¹«°Íµµ º¯°æµÇÁö ¾Ê¾Ò½À´Ï´Ù.", "º¯°æ »çÇ× ¾øÀ½!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    if (!changeAnything) MessageBox.Show("ì•„ë¬´ê²ƒë„ ë³€ê²½ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.", "ë³€ê²½ ì‚¬í•­ ì—†ìŒ!", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     else
                     {
-                        MessageBox.Show("³¯Â¥ ¹× ½Ã°£ÀÌ º¯°æµÇ¾ú½À´Ï´Ù.", "º¯°æ ¿Ï·á", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("ë‚ ì§œ ë° ì‹œê°„ì´ ë³€ê²½ë˜ì—ˆìŠµë‹ˆë‹¤.", "ë³€ê²½ ì™„ë£Œ", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         Refresh_FileList();
                     }
                 };
                 ChangeDateTimeForm.ShowDialog();
             }
         }
-        private void TimeSetMasked_KeyPress(object sender, KeyPressEventArgs e)
+
+        private void TimeSetMasked_KeyPress(object? sender, KeyPressEventArgs e)
         {
             int startIndex = TimeSetMasked.SelectionStart;
             if (char.IsDigit(e.KeyChar) && startIndex < TimeSetMasked.Text.Length - 1)
@@ -1026,7 +789,8 @@ namespace FileRenamer
                 }
             }
         }
-        private void TimeSetMasked_Validating(object sender, CancelEventArgs e)
+
+        private void TimeSetMasked_Validating(object? sender, CancelEventArgs e)
         {
             int hour, minute;
             try
@@ -1036,35 +800,36 @@ namespace FileRenamer
             }
             catch
             {
-                MessageBox.Show("¿Ã¹Ù¸¥ ½Ã°£ Çü½ÄÀÌ ¾Æ´Õ´Ï´Ù.", "½Ã°£°ª ¿À·ù", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("ì˜¬ë°”ë¥¸ ì‹œê°„ í˜•ì‹ì´ ì•„ë‹™ë‹ˆë‹¤.", "ì‹œê°„ê°’ ì˜¤ë¥˜", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 e.Cancel = true;
                 return;
             }
             if (hour < 0 || hour > 23 || minute < 0 || minute > 59)
             {
-                MessageBox.Show("¿Ã¹Ù¸¥ ½Ã°£ Çü½ÄÀÌ ¾Æ´Õ´Ï´Ù.", "½Ã°£°ª ¿À·ù", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                e.Cancel = true; // ÀÔ·Â°ªÀ» Ãë¼ÒÇÏ¿© ÀÌÀü °ªÀ¸·Î µÇµ¹¸®±â
+                MessageBox.Show("ì˜¬ë°”ë¥¸ ì‹œê°„ í˜•ì‹ì´ ì•„ë‹™ë‹ˆë‹¤.", "ì‹œê°„ê°’ ì˜¤ë¥˜", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                e.Cancel = true; // ì…ë ¥ê°’ì„ ì·¨ì†Œí•˜ì—¬ ì´ì „ ê°’ìœ¼ë¡œ ë˜ëŒë¦¬ê¸°
                 return;
             }
         }
         #endregion
 
         #region Rename Event
-        private void ReNameButton_Click(object sender, EventArgs e) // ÀÌ¸§ ¹Ù²Ù±â Æû ¿­±â 
+        private void ReNameButton_Click(object? sender, EventArgs e) // ì´ë¦„ ë°”ê¾¸ê¸° í¼ ì—´ê¸° 
         {
-            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("¼±ÅÃÇÑ ÆÄÀÏÀÌ ¾ø½À´Ï´Ù.", "´ë»ó ¾øÀ½", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
-            Rename rename = new();
-            rename.StartPosition = FormStartPosition.CenterParent;
-            rename.ExcuteRename += Rename_Renamed;
-            rename.ShowDialog();
+            if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("ì„ íƒí•œ íŒŒì¼ì´ ì—†ìŠµë‹ˆë‹¤.", "ëŒ€ìƒ ì—†ìŒ", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
+            using Rename Renamer = new();
+            Renamer.StartPosition = FormStartPosition.CenterParent;
+            Renamer.ExcuteRename += Rename_Renamed;
+            Renamer.ShowDialog();
         }
-        private void Rename_Renamed(string? Regular) // ÀÌ¸§ ¹Ù²Ù±â Æû ÀÌº¥Æ® ¸®½º³Ê 
+
+        private void Rename_Renamed(string? namePattern) // ì´ë¦„ ë°”ê¾¸ê¸° í¼ ì´ë²¤íŠ¸ ë¦¬ìŠ¤ë„ˆ 
         {
-            if (Regular != null)
+            if (namePattern != null)
             {
-                if (Regular.Trim() != string.Empty)
+                if (namePattern.Trim() != string.Empty)
                 {
-                    if (!FileRenameWorker.IsBusy) FileRenameWorker.RunWorkerAsync(Regular);
+                    if (!FileRenameWorker.IsBusy) FileRenameWorker.RunWorkerAsync(namePattern);
                     else FileLoadWorker.CancelAsync();
                     StatusLabel2.Text = string.Empty;
                 }
@@ -1073,10 +838,10 @@ namespace FileRenamer
         #endregion
 
         #region External UI
-        private void SettingButton_Click(object sender, EventArgs e) // ¼³Á¤ ¹öÆ° 
+        private void SettingButton_Click(object? sender, EventArgs e) // ì„¤ì • ë²„íŠ¼ 
         {
             FileListView.Select();
-            Setting SettingForm = new();
+            using Setting SettingForm = new();
             SettingForm.StartPosition = FormStartPosition.CenterParent;
             SettingForm.DefaultFileName = DefaultFileName;
             SettingForm.IsDateTimeAllChange = IsDateTimeAllChange;
@@ -1087,7 +852,8 @@ namespace FileRenamer
             };
             SettingForm.ShowDialog();
         }
-        private void SearchWords_TextChanged(object sender, EventArgs e) // °Ë»ö¾î ÀÔ·Â 
+
+        private void SearchWords_TextChanged(object? sender, EventArgs e) // ê²€ìƒ‰ì–´ ì…ë ¥ 
         {
             if (FileLoadWorker.IsBusy) return;
             int SearchItemCount = 0;
@@ -1101,82 +867,39 @@ namespace FileRenamer
                     int resultindex = 0;
                     foreach (ListViewItem items in FileItemInfo) if (items.SubItems[1].Text.Contains(SearchWords.Text)) ResultItems[resultindex++] = items;
                     FileListView.Items.AddRange(ResultItems);
-                    StatusLabel1.Text = string.Format("{0}°³ Ç×¸ñ", SearchItemCount);
+                    StatusLabel1.Text = string.Format("{0}ê°œ í•­ëª©", SearchItemCount);
                     IsEmptyWorkSpaceLabel.Hide();
                 }
                 else
                 {
-                    StatusLabel1.Text = "0°³ Ç×¸ñ";
-                    IsEmptyWorkSpaceLabel.Text = "ÀÏÄ¡ÇÏ´Â Ç×¸ñÀÌ ¾ø½À´Ï´Ù.";
+                    StatusLabel1.Text = "0ê°œ í•­ëª©";
+                    IsEmptyWorkSpaceLabel.Text = "ì¼ì¹˜í•˜ëŠ” í•­ëª©ì´ ì—†ìŠµë‹ˆë‹¤.";
                     IsEmptyWorkSpaceLabel.Show();
                 }
                 MainUILayout(0);
             }
         }
-        private void SearchWords_KeyDown(object sender, KeyEventArgs e) // °Ë»ö¾î °¨Áö 
+        private void SearchWords_KeyDown(object? sender, KeyEventArgs e) // ê²€ìƒ‰ì–´ ê°ì§€ 
         {
             if (e.KeyCode == Keys.Enter) FileListView.Focus();
         }
-        private void SearchWords_KeyPress(object sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true; } // Enter ¼Ò¸® ¹«À½ Ã³¸® 
-        private void OpenFolderButton_Click(object sender, EventArgs e) { OpenFolder(); } // Æú´õ ¿­±âClick 
-        private void OpenFolder(string NewFolderPath = "") // Æú´õ ¿­±â 
-        {
-            if (NewFolderPath == string.Empty)
-            {
-                FileListView.Select();
-                FolderBrowserDialog OpenFolder = new();
-                DialogResult = OpenFolder.ShowDialog();
-                if (DialogResult == DialogResult.OK)
-                {
-                    FolderPath = OpenFolder.SelectedPath;
-                    if (!FileLoadWorker.IsBusy)
-                    {
-                        IsEmptyWorkSpaceLabel.Hide();
-                        WorkPathLabel.Text = OpenFolder.SelectedPath;
-                        FileListView.Items.Clear();
-                        FileLoadWorker.RunWorkerAsync(FolderPath);
-                    }
-                    else
-                    {
-                        FileLoadWorker.CancelAsync();
-                        FileListView.Items.Clear();
-                        FileItemInfo.Clear();
-                        this.OpenFolder();
-                    }
-                }
-                StatusLabel2.Text = string.Empty;
-            }
-            else
-            {
-                FolderPath = NewFolderPath;
-                if (!FileLoadWorker.IsBusy)
-                {
-                    IsEmptyWorkSpaceLabel.Hide();
-                    WorkPathLabel.Text = NewFolderPath;
-                    FileListView.Items.Clear();
-                    FileLoadWorker.RunWorkerAsync(FolderPath);
-                }
-                else
-                {
-                    FileLoadWorker.CancelAsync();
-                    FileListView.Items.Clear();
-                    FileItemInfo.Clear();
-                    this.OpenFolder(FolderPath);
-                }
-            }
-        }
-        private void OpenExplorer_Click(object sender, EventArgs e) // Å½»ö±â·Î ¿­±â 
+
+        private void SearchWords_KeyPress(object? sender, KeyPressEventArgs e) { if (e.KeyChar == (char)Keys.Enter || e.KeyChar == (char)Keys.Escape) e.Handled = true; } // Enter ì†Œë¦¬ ë¬´ìŒ ì²˜ë¦¬ 
+
+        private void OpenFolderButton_Click(object? sender, EventArgs e) { OpenFolder(); } // í´ë” ì—´ê¸°Click 
+
+        private void OpenExplorer_Click(object? sender, EventArgs e) // íƒìƒ‰ê¸°ë¡œ ì—´ê¸° 
         {
             FileListView.Select();
             if (FolderPath != null) Process.Start("explorer.exe", FolderPath);
-            else StatusLabel1.Text = "ÇöÀç ¼³Á¤µÈ ÀÛ¾÷ °æ·Î ¾ø½À´Ï´Ù.";
+            else StatusLabel1.Text = "í˜„ì¬ ì„¤ì •ëœ ì‘ì—… ê²½ë¡œ ì—†ìŠµë‹ˆë‹¤.";
         }
         #endregion
 
         #region ToolStripMenu
-        private void UpdateCheckToolStrip_Click(object sender, EventArgs e)
+        private void UpdateCheckToolStrip_Click(object? sender, EventArgs e)
         {
-            MessageBox.Show(string.Format($"ÇöÀç ¹öÀü : {Version}"), "¾÷µ¥ÀÌÆ® È®ÀÎ");
+            MessageBox.Show(string.Format($"í˜„ì¬ ë²„ì „ : {Version}"), "ì—…ë°ì´íŠ¸ í™•ì¸");
         }
         #endregion
     }

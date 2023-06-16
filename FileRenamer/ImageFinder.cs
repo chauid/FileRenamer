@@ -1,8 +1,7 @@
-﻿using System.ComponentModel.Design;
-using System.Drawing.Drawing2D;
+﻿using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 
-namespace FindImage
+namespace FileRenamer
 {
     /// <summary>
     /// 이미지 파일을 RootPath에서 모든 하위 디렉토리를 조회하여 찾아줍니다.
@@ -10,28 +9,33 @@ namespace FindImage
     internal class ImageFinder
     {
         private static readonly string ProjectPath = Path.GetFullPath(Path.Combine(Application.StartupPath));
+
         private struct ImageInfo
         {
             public bool IsFind;
             public Image ImageFile;
         }
         #region GetImageFile
+
         public static Image GetIamgeFile(string InputFileName) // 파일 이름만 넣을 시 
         {
             ImageInfo SearchedFile = SearchProcess(InputFileName, ProjectPath);
             if (SearchedFile.IsFind) return SearchedFile.ImageFile;
-            else return new Bitmap(1,1); // 파일없음 : (1,1)비트맵 
+            else return new Bitmap(1, 1); // 파일없음 : (1,1)비트맵 
         }
+
         public static Image GetIamgeFile(string InputFileName, string InputRootDirectory) // 파일 이름 + 경로 
         {
             ImageInfo SearchedFile = SearchProcess(InputFileName, InputRootDirectory);
             if (SearchedFile.IsFind) return SearchedFile.ImageFile;
             else return new Bitmap(1, 1); // 파일없음 : (1,1)비트맵 
         }
+
         public static Image GetIamgeFile(string InputFileName, int width, int height) // 파일 이름 + 크기 
         {
             return GetIamgeFile(InputFileName, ProjectPath, width, height);
         }
+
         public static Image GetIamgeFile(string InputFileName, string InputRootDirectory, int width, int height) // 파일 이름 + 경로 + 크기 
         {
             Image image;
@@ -41,20 +45,21 @@ namespace FindImage
             Rectangle destRect = new(0, 0, width, height);
             Bitmap destImage = new(width, height);
             destImage.SetResolution(image.HorizontalResolution, image.VerticalResolution);
-            using (var graphics = Graphics.FromImage(destImage))
+            using (Graphics graphics = Graphics.FromImage(destImage))
             {
                 graphics.CompositingMode = CompositingMode.SourceCopy;
                 graphics.CompositingQuality = CompositingQuality.HighQuality;
                 graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 graphics.SmoothingMode = SmoothingMode.HighQuality;
                 graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
-                using var wrapMode = new ImageAttributes();
+                ImageAttributes wrapMode = new();
                 wrapMode.SetWrapMode(WrapMode.TileFlipXY);
                 graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, wrapMode);
             }
             return destImage;
         }
         #endregion
+
         private static ImageInfo SearchProcess(string InputFileName, string InputRootDirectory)
         {
             ImageInfo SearchedFile = new() { ImageFile = new Bitmap(1, 1), IsFind = false };
