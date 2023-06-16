@@ -1,0 +1,13 @@
+# build output
+.vs/
+FileRenamer/bin/Debug/net6.0-windows/FileRenamer.dll
+FileRenamer/bin/Debug/net6.0-windows/FileRenamer.exe
+FileRenamer/bin/Debug/net6.0-windows/FileRenamer.pdb
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.csproj.CoreCompileInputs.cache
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.csproj.FileListAbsolute.txt
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.csproj.GenerateResource.cache
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.dll
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.genruntimeconfig.cache
+FileRenamer/obj/Debug/net6.0-windows/FileRenamer.pdb
+FileRenamer/obj/Debug/net6.0-windows/apphost.exe
+ FileRenamer/obj/Debug/net6.0-windows/FileRenamer.designer.runtimeconfig.json
