@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\workspace\\FileRenamer\\FileRenamer\\FileRenamer.csproj": {}
+    "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer.csproj": {}
   },
   "projects": {
-    "C:\\workspace\\FileRenamer\\FileRenamer\\FileRenamer.csproj": {
+    "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\workspace\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
+        "projectUniqueName": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
         "projectName": "FileRenamer",
-        "projectPath": "C:\\workspace\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
-        "packagesPath": "C:\\Users\\user\\.nuget\\packages\\",
-        "outputPath": "C:\\workspace\\FileRenamer\\FileRenamer\\obj\\",
+        "projectPath": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
+        "packagesPath": "C:\\Users\\dlfdl\\.nuget\\packages\\",
+        "outputPath": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\user\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\dlfdl\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],

@@ -12,7 +12,7 @@ using System.Diagnostics;
 namespace FileRenamer
 {
     /// <summary>
-    /// <para>이름 이름 변경 표현식 유형 : {추가, 삭제, 대체, 새이름 정의, 숫자증분}</para>
+    /// <para>이름 변경 표현식 유형 : {추가, 삭제, 대체, 새이름 정의, 숫자증분}</para>
     /// <para>이름 변경 표현식 구분자 : "{}"</para>
     /// </summary>
     public enum RegularType
@@ -44,7 +44,7 @@ namespace FileRenamer
     }
     public partial class Main : Form
     {
-        public const string Version = "0.9-alpha";
+        public const string Version = "0.9-beta";
 
         /// <summary>
         /// ListView 우클릭 메뉴 
@@ -1053,10 +1053,10 @@ namespace FileRenamer
         private void ReNameButton_Click(object sender, EventArgs e) // 이름 바꾸기 폼 열기 
         {
             if (FileListView.CheckedItems.Count == 0) { MessageBox.Show("선택한 파일이 없습니다.", "대상 없음", MessageBoxButtons.OK, MessageBoxIcon.Error); FileListView.Select(); return; }
-            Rename rename = new();
-            rename.StartPosition = FormStartPosition.CenterParent;
-            rename.ExcuteRename += Rename_Renamed;
-            rename.ShowDialog();
+            Rename Renamer = new();
+            Renamer.StartPosition = FormStartPosition.CenterParent;
+            Renamer.excuteRename += Rename_Renamed;
+            Renamer.ShowDialog();
         }
         private void Rename_Renamed(string? Regular) // 이름 바꾸기 폼 이벤트 리스너 
         {

@@ -5,12 +5,16 @@ namespace FileRenamer
     /// <summary>
     /// 이름 바꾸기 이벤트 핸들러 
     /// </summary>
-    /// <param name="Regular">이름 변경 표현식</param>
-    public delegate void RenameEventArgs(string? Regular);
+    /// <param name="NameExpression">이름 변경 표현식</param>
+    public delegate void RenameEventArgs(string? NameExpression);
     public partial class Rename : Form
     {
-        private bool AdvancedOption = false;
-        public event RenameEventArgs? ExcuteRename;
+        private bool isRenameAvailable = true;
+        private string errorMsg = string.Empty;
+        private bool advancedOption = false;
+        public event RenameEventArgs? excuteRename;
+
+        private ComboBox regularListCombo = new();
 
         #region Rename
         public Rename()
@@ -19,6 +23,11 @@ namespace FileRenamer
             DetailOptionPanel.Select();
             AppendRadioButton.Checked = true;
             PatternTextBox.KeyPress += KeyPress_RenameTextBox;
+
+            regularListCombo.Items.AddRange(Enum.GetNames(typeof(RegularType)));
+            this.Controls.Add(regularListCombo);
+            regularListCombo.BringToFront();
+            regularListCombo.Hide();
 
             // 종료 이벤트 
             foreach (Control controls in this.Controls)
@@ -31,8 +40,12 @@ namespace FileRenamer
         #region OKCancel
         private void ChangeButton_Click(object sender, EventArgs e) // 변경 
         {
-            ExcuteRename?.Invoke(PatternTextBox.Text);
-            Close();
+            if (!isRenameAvailable)
+            {
+                excuteRename?.Invoke(PatternTextBox.Text);
+                Close();
+            }
+            else MessageBox.Show(errorMsg, "변경 오류", MessageBoxButtons.OK);
         }
         private void CloseButton_Click(object sender, EventArgs e) { Close(); } // 취소 
         #endregion
@@ -325,13 +338,13 @@ namespace FileRenamer
 
         private void AdvancedDetailButton_Click(object sender, EventArgs e)
         {
-            if (AdvancedOption)
+            if (advancedOption)
             {
                 ClientSize = new Size(400, 250);
                 ChangeButton.Location = new Point(215, 215);
                 CloseButton.Location = new Point(305, 215);
                 AdvancedDetailButton.Text = "고급 설정 ∨";
-                AdvancedOption = false;
+                advancedOption = false;
             }
             else
             {
@@ -339,7 +352,7 @@ namespace FileRenamer
                 ChangeButton.Location = new Point(215, 280);
                 CloseButton.Location = new Point(305, 280);
                 AdvancedDetailButton.Text = "고급 설정 ∧";
-                AdvancedOption = true;
+                advancedOption = true;
             }
         }
         private void KeyDown_RenameForm(object? sender, KeyEventArgs e)
@@ -360,7 +373,7 @@ namespace FileRenamer
         }
         private void Leave_RenameTextBox(object? sender, EventArgs e)
         {
-            if(sender is TextBox RenameBox)
+            if (sender is TextBox RenameBox)
             {
                 if (string.IsNullOrWhiteSpace(RenameBox.Text)) { RenameBox.Text = string.Empty; return; } // 모두 공백이거나 빈 문자열
                 while (RenameBox.Text.Last() == '.') RenameBox.Text = RenameBox.Text.Remove(RenameBox.Text.Length - 1); // 마지막 '.' 삭제
@@ -371,16 +384,59 @@ namespace FileRenamer
 
         private void PatternTextBox_TextChanged(object sender, EventArgs e)
         {
-            if (PatternTextBox.Text.Length > 15)
+            if (PatternTextBox.Text.Length < 1)
             {
-                string[] invalidChar = { "/", "?", "|", "\\", "<", ">", "\"", "*", ":" };
-                if (invalidChar.Any(data => PatternTextBox.Text.Contains(data))) Console.WriteLine("Invalid Character!");
-                // 파일명 유효성 검사 KeyCode
-                // /,?, |, \, <, >, ", *, :
-
-                // 유효성 금지 문자 무차별 대입시 "의 처음과 끝을 구분하여 "내부 문자열"을 추출하여 이름 변경 표현식 유효성 검사 실행해야 함
-                // 처음 "와 끝 "의 구분해야 함
+                regularListCombo.Hide();
+                return;
             }
+            if (PatternTextBox.Text.First() != '{')
+            {
+                isRenameAvailable = false;
+                Console.WriteLine("밑줄긋기");
+                regularListCombo.Hide();
+            }
+            else
+            {
+                regularListCombo.Location = new Point(PatternTextBox.Left, PatternTextBox.Bottom);
+                regularListCombo.Show();
+                regularListCombo.DroppedDown = true;
+                Console.WriteLine(PatternTextBox.SelectionStart);
+            }
+            // 유효성 검사 1 : 이름 변경 표현식 검사
+            string isRegular = string.Empty;
+
+
+
+
+
+            char[] invalidChar = { '/', '?', '|', '\\', '<', '>', '\"', '*', ':' };
+            Stack<char> bracketStack = new Stack<char>();
+            if (PatternTextBox.Text[0] != '{')
+            {
+                ErrorTextBox.Text = "구문 오류!";
+                return;
+            }
+            else ErrorTextBox.Text = "";
+            foreach (char c in PatternTextBox.Text)
+            {
+                if (c == '{') bracketStack.Push(c);
+                bracketStack.Peek();
+            }
+            if (invalidChar.Any(data => PatternTextBox.Text.Contains(data)))
+            {
+                ErrorTextBox.Text = "구문 오류!";
+            }
+            else
+            {
+                ErrorTextBox.Text = "정상";
+            }
+            // 파일명 유효성 검사 KeyCode
+            // /,?, |, \, <, >, ", *, :
+
+            // 유효성 금지 문자 무차별 대입시 "의 처음과 끝을 구분하여 "내부 문자열"을 추출하여 이름 변경 표현식 유효성 검사 실행해야 함
+            // 처음 "와 끝 "의 구분해야 함
+            // '{'가 연속으로 2번 이상 나올 시 구문오류
+            // '{'와 '}' 사이에는 '"'는 2번만 가능
         }
 
         private void PreviewButton_Click(object sender, EventArgs e)

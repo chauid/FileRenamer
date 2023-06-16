@@ -67,7 +67,7 @@
             InputFileNameTextBox.SelectionLength = 0;
             InputFileNameTextBox.SelectionStart = 0;
             InputFileNameTextBox.ShortcutsEnabled = true;
-            InputFileNameTextBox.Size = new Size(285, 48);
+            InputFileNameTextBox.Size = new Size(330, 48);
             InputFileNameTextBox.TabIndex = 1;
             InputFileNameTextBox.TabStop = false;
             InputFileNameTextBox.TextAlign = HorizontalAlignment.Left;

@@ -1,10 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "VW5HyqmKEJzEoeOjs2Acu+N9r/fVFr+IL5r2dgL3eBuY9VYZo5mc+tYr59rBCJ8YUZUWBIDfLvuaYAeRJySfhQ==",
+  "dgSpecHash": "s3rtj3z5AHgzpCOugfxtJEvCFZxYZ0vGqPBU/pIRoAFhYLbfcEhsKnorEa6IaeYN9+yuQlWx/uX3bRVaZwzi0A==",
   "success": true,
-  "projectFilePath": "C:\\workspace\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
+  "projectFilePath": "E:\\WorkSpace\\GitHub\\FileRenamer\\FileRenamer\\FileRenamer.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\user\\.nuget\\packages\\materialskin.2\\2.3.1\\materialskin.2.2.3.1.nupkg.sha512"
+    "C:\\Users\\dlfdl\\.nuget\\packages\\materialskin.2\\2.3.1\\materialskin.2.2.3.1.nupkg.sha512"
   ],
   "logs": []
 }

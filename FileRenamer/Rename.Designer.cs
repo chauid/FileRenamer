@@ -39,6 +39,7 @@
             PatternTextBox = new TextBox();
             AdvancedDetailButton = new Button();
             PreviewButton = new Button();
+            ErrorTextBox = new Label();
             SuspendLayout();
             // 
             // ChangeButton
@@ -201,12 +202,22 @@
             PreviewButton.UseVisualStyleBackColor = false;
             PreviewButton.Click += PreviewButton_Click;
             // 
+            // ErrorTextBox
+            // 
+            ErrorTextBox.AutoSize = true;
+            ErrorTextBox.ForeColor = Color.Red;
+            ErrorTextBox.Location = new Point(25, 280);
+            ErrorTextBox.Name = "ErrorTextBox";
+            ErrorTextBox.Size = new Size(0, 15);
+            ErrorTextBox.TabIndex = 9;
+            // 
             // Rename
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.WhiteSmoke;
             ClientSize = new Size(400, 250);
+            Controls.Add(ErrorTextBox);
             Controls.Add(PreviewButton);
             Controls.Add(PatternTextBox);
             Controls.Add(AdvancedDetailButton);
@@ -243,5 +254,6 @@
         private TextBox PatternTextBox;
         private Button AdvancedDetailButton;
         private Button PreviewButton;
+        private Label ErrorTextBox;
     }
 }
